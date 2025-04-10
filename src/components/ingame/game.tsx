@@ -72,17 +72,36 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
     const [touchStartY, setTouchStartY] = useState(0);
     const [isTouchMoving, setIsTouchMoving] = useState(false);
 
+    const handleClick = (element: any) => {
+        if (!element) return;
+        if (element.posistion !== undefined) {
+            prop.clickedOnBoard(element.posistion);
+        }
+    };
+
     const handleTouchStart = (e: React.TouchEvent) => {
+        if (!prop.myTurn) return;
         setTouchStartX(e.touches[0].clientX);
         setTouchStartY(e.touches[0].clientY);
         setIsTouchMoving(false);
     };
 
-    const handleTouchMove = () => {
-        setIsTouchMoving(true);
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!prop.myTurn) return;
+        const touchCurrentX = e.touches[0].clientX;
+        const touchCurrentY = e.touches[0].clientY;
+        
+        const deltaX = Math.abs(touchCurrentX - touchStartX);
+        const deltaY = Math.abs(touchCurrentY - touchStartY);
+        
+        // If movement is greater than threshold, consider it a scroll
+        if (deltaX > 5 || deltaY > 5) {
+            setIsTouchMoving(true);
+        }
     };
 
     const handleTouchEnd = (e: React.TouchEvent, element: any) => {
+        if (!prop.myTurn) return;
         if (isTouchMoving) return; // Prevent click if user was scrolling
 
         const touchEndX = e.changedTouches[0].clientX;
@@ -759,13 +778,15 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
         if (board) {
             board.addEventListener('touchstart', handleTouchStart as any, options);
             board.addEventListener('touchmove', handleTouchMove as any, options);
+            board.addEventListener('touchend', (e: TouchEvent) => handleTouchEnd(e as any, null), options);
             
             return () => {
                 board.removeEventListener('touchstart', handleTouchStart as any);
                 board.removeEventListener('touchmove', handleTouchMove as any);
+                board.removeEventListener('touchend', (e: TouchEvent) => handleTouchEnd(e as any, null));
             };
         }
-    }, []);
+    }, [prop.myTurn]);
 
     return (
         <>
@@ -1460,21 +1481,444 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
                                 }}
                             ></div>
                         </div>
+                        <div id="display-streets">
+                            <div
+                                data-position="39"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "83%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="38"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "74.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="37"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "66.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="36"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "58.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="35"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "50%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="34"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "41.75%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="33"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "33.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="32"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "25.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="31"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "17.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="30"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="29"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "83%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="28"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "74.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="27"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "66.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="26"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "58.25%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="25"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "50%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="24"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "41.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="23"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "33.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="22"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "25.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="21"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "17.25%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="20"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="19"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "17.25%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="18"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "25.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="17"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "33.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="16"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "41.75%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="15"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "50%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="14"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "58.25%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="13"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "66.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="12"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "74.75%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="11"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "83%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                className="street"
+                                data-position="10"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="9"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "17.25%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="8"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "25.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="7"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "33.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="6"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "41.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="5"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "50%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="4"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "58.25%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="3"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "66.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="2"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "74.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="1"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "83%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="0"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                        </div>
                     </div>
-                    <div className="action-bar" style={prop.myTurn && !sended ? {} : { translate: "-50% 20vh" }}>
+                    <div className="action-bar" style={prop.myTurn && !sended ? {} : { transform: 'translateY(100%)' }}>
                         {prop.selectedMode.turnTimer !== undefined && prop.selectedMode.turnTimer > 0 ? (
-                            <>
-                                <p style={{ display: "inline-block", opacity: 1, color: "rgb(0, 114, 187)", marginRight: 5 }}>
-                                    {prop.selectedMode.turnTimer - timer}{" "}
-                                </p>
-                                <hr style={{ display: "inline", opacity: 0.5 }} />
-                            </>
+                            <div className="timer">
+                                <span>{prop.selectedMode.turnTimer - timer}</span>
+                            </div>
                         ) : (
                             <></>
                         )}
-                        <button data-button-type="roll" aria-disabled={false}>
-                            <p>ROLL THE </p>
-                            <img style={{ marginLeft: 10 }} src={RollIcon.replace("public/", "")} />
+                        <button 
+                            className="action-button"
+                            onClick={() => {
+                                if (prop.myTurn && !sended) {
+                                    SetSended(true);
+                                    prop.socket.emit("roll_dice");
+                                    SetTimer(0);
+                                }
+                            }}
+                            disabled={!prop.myTurn || sended}
+                        >
+                            <img src={RollIcon.replace("public/", "")} alt="Roll" />
                         </button>
                         <button data-button-type="pay" data-tooltip-hover="pay" aria-disabled={true}>
                             <img src="pay1.png" />

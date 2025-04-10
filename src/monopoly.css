@@ -1842,21 +1842,17 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
 /* Base Mobile Styles */
 @media screen and (max-width: 768px) {
     div.board {
-        width: 100vw;
-        max-width: 500px;
-        transform: scale(0.6);
-        margin: 0 auto;
-        position: relative;
-        top: -10%;
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        touch-action: manipulation; /* Disable double-tap zoom */
+        width: var(--board-size-mobile);
+        height: var(--board-size-mobile);
+        transform: scale(0.95);
+        margin: 10px auto;
+        -webkit-overflow-scrolling: touch;
+        touch-action: manipulation;
     }
 
     main {
-        flex-direction: column;
-        height: auto;
-        min-height: 100vh;
-        -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+        padding: 10px;
+        height: calc(100vh - var(--action-bar-height));
     }
 
     main nav.main {
@@ -1875,46 +1871,59 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
 
     div.action-bar {
         position: fixed;
-        bottom: env(safe-area-inset-bottom, 0); /* Support for iPhone notch */
+        bottom: max(env(safe-area-inset-bottom), 10px);
         left: 0;
         width: 100%;
         padding: 10px;
-        box-sizing: border-box;
-        background: rgba(20, 20, 20, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 0;
-        z-index: 1000;
         display: flex;
         justify-content: center;
         gap: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
     }
 
-    div.action-bar button {
-        padding: 12px 20px; /* Larger touch targets */
-        font-size: 16px;
-        height: auto;
-        white-space: nowrap;
-        min-height: 44px; /* iOS minimum touch target size */
+    .action-bar button {
+        width: var(--button-size);
+        height: var(--button-size);
+        padding: 8px;
+        border-radius: 12px;
+        font-size: clamp(12px, 3vw, 16px);
     }
 
-    div.card-display-actions {
+    .card-display-actions {
+        position: fixed;
+        bottom: calc(var(--action-bar-height) + max(env(safe-area-inset-bottom), 10px));
+        left: 50%;
+        transform: translateX(-50%);
         width: 90%;
-        max-width: 300px;
-        min-height: auto;
+        max-width: 400px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .street-card {
+        max-width: 100%;
         padding: 15px;
-        touch-action: manipulation;
     }
 
-    div.street-card {
-        min-height: 350px;
-        max-height: 350px;
-        touch-action: manipulation;
+    .trade-table {
+        width: 100%;
+        height: auto;
+        max-height: 80vh;
+        overflow-y: auto;
     }
 
-    div.chance-card {
-        min-width: 300px;
-        max-width: 300px;
-        touch-action: manipulation;
+    .player-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .property-nav {
+        padding: 8px;
+        margin: 4px;
+        border-radius: 8px;
     }
 
     main nav.content[data-index="2"] div.main-chat {
@@ -1952,130 +1961,98 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
     }
 }
 
-/* iPad/Tablet Styles */
+/* Tablet optimizations */
 @media screen and (min-width: 768px) and (max-width: 1024px) {
     div.board {
-        width: 700px;
-        transform: scale(0.8);
-        margin: -5% auto;
+        width: var(--board-size-tablet);
+        height: var(--board-size-tablet);
+        transform: scale(0.98);
     }
 
-    main nav.main {
-        width: 320px;
+    .action-bar {
+        bottom: 20px;
     }
 
-    div.card-display-actions {
-        width: 300px;
-    }
-
-    div.action-bar {
-        bottom: 5%;
-    }
-
-    div.game div.trade-table div.trade-mission {
-        width: 90%;
+    .card-display-actions {
+        max-width: 450px;
     }
 }
 
-/* iPhone 11+ Specific */
-@media screen and (min-device-width: 375px) and (max-device-width: 896px) and (-webkit-min-device-pixel-ratio: 2) {
+/* iPad Pro and larger tablets */
+@media screen and (min-width: 1024px) and (max-width: 1366px) {
     div.board {
-        transform: scale(0.55);
-        top: -15%;
-    }
-
-    main nav.main nav.header div.button {
-        height: 35px;
-        margin-bottom: 10px;
-    }
-
-    div.action-bar button {
-        padding: 10px;
-        font-size: 13px;
-    }
-
-    div.card-display-actions {
-        transform: translateY(-40%) translateX(-50%);
-    }
-
-    div.dialog-box {
-        width: 90%;
-        padding: 30px;
-        max-height: 80vh;
-        overflow-y: auto;
+        width: min(80vw, var(--board-size-desktop));
+        height: min(80vw, var(--board-size-desktop));
     }
 }
 
-/* Landscape Mode */
-@media screen and (max-height: 500px) and (orientation: landscape) {
-    div.board {
-        transform: scale(0.45);
-        top: -25%;
-    }
-
-    main {
+/* Landscape mode optimizations */
+@media screen and (max-width: 926px) and (orientation: landscape) {
+    .game-container {
         flex-direction: row;
+        justify-content: space-between;
+        padding: 10px;
     }
 
-    main nav.main {
-        width: 280px;
+    div.board {
+        width: 80vh;
+        height: 80vh;
+        margin: 0;
+    }
+
+    .action-bar {
+        position: fixed;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: auto;
+        height: auto;
+        flex-direction: column;
+    }
+
+    .card-display-actions {
+        right: 80px;
+        bottom: 20px;
+        left: auto;
+        transform: none;
+    }
+
+    .trade-table {
+        max-width: 300px;
         height: 100vh;
     }
-
-    div.action-bar {
-        padding: 5px;
-        bottom: 10px;
-    }
-
-    div.card-display-actions {
-        transform: translateY(-50%) translateX(-50%) scale(0.8);
-    }
 }
 
-/* High DPI/Retina Optimizations */
+/* High DPI screens */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    div.board,
-    div.street-card,
-    div.chance-card {
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-        -webkit-transform-style: preserve-3d;
-        transform-style: preserve-3d;
-    }
-
-    div.board div.street img,
-    div.player img,
-    div.action-bar button img {
+    .board {
         image-rendering: -webkit-optimize-contrast;
         image-rendering: crisp-edges;
     }
 }
 
-/* Touch Input Optimizations */
+/* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
-    div.action-bar button,
-    main nav.main nav.header div.button,
-    div.proprety-nav,
-    div.card-display-actions div button {
+    .action-bar button,
+    .dialog-box button,
+    .property-nav,
+    .trade-craft-buttons button {
         min-height: 44px;
         min-width: 44px;
-    }
-
-    div.dialog-box div.buttons button {
-        padding: 10px 30px;
-        margin: 5px;
+        padding: 12px;
     }
 
     input, select, button {
-        font-size: 16px;
+        font-size: 16px; /* Prevent zoom on iOS */
     }
 }
 
-/* Safe Area Insets for Modern Devices */
+/* Safe area handling for notched devices */
 @supports (padding: max(0px)) {
-    div.action-bar {
-        padding-bottom: max(10px, env(safe-area-inset-bottom));
-        padding-left: max(10px, env(safe-area-inset-left));
-        padding-right: max(10px, env(safe-area-inset-right));
+    .game-container {
+        padding-left: max(env(safe-area-inset-left), 10px);
+        padding-right: max(env(safe-area-inset-right), 10px);
+        padding-bottom: max(env(safe-area-inset-bottom), 10px);
+        padding-top: max(env(safe-area-inset-top), 10px);
     }
 }
