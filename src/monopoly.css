@@ -854,17 +854,15 @@ div.message p:nth-child(2) {
 }
 
 div.board {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
     aspect-ratio: 1;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    width: 900px;
-    background-image: url("/board2.png");
-    background-size: cover;
-    box-shadow: 0px 0px 0px 3px black;
-    z-index: 0;
-    transition: transform 0.1s ease-out;
+    margin: 0 auto;
+    background-color: #c5e6d0;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 div.board div#display-houses div.street-houses {
@@ -1842,14 +1840,8 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
 /* Base Mobile Styles */
 @media screen and (max-width: 768px) {
     div.board {
-        width: 100vw;
-        max-width: 500px;
-        transform: scale(0.6);
-        margin: 0 auto;
-        position: relative;
-        top: -10%;
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        touch-action: manipulation; /* Disable double-tap zoom */
+        width: 95vw;
+        margin: 10px auto;
     }
 
     main {
@@ -2078,4 +2070,147 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
         padding-left: max(10px, env(safe-area-inset-left));
         padding-right: max(10px, env(safe-area-inset-right));
     }
+}
+
+/* Game squares and properties */
+.square {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 4px;
+    font-size: clamp(8px, 2vw, 14px);
+    transition: transform 0.2s ease;
+}
+
+.square:active {
+    transform: scale(0.95);
+}
+
+.property-name {
+    font-weight: bold;
+    margin-bottom: 2px;
+    font-size: clamp(6px, 1.8vw, 12px);
+}
+
+.property-price {
+    font-size: clamp(6px, 1.5vw, 10px);
+}
+
+/* Player tokens and indicators */
+.player-token {
+    width: clamp(12px, 3vw, 24px);
+    height: clamp(12px, 3vw, 24px);
+    border-radius: 50%;
+    position: absolute;
+    transition: all 0.3s ease;
+}
+
+/* Action buttons and controls */
+.action-button {
+    padding: clamp(4px, 2vw, 12px);
+    font-size: clamp(12px, 3vw, 16px);
+    border-radius: 4px;
+    margin: 4px;
+    min-width: clamp(60px, 15vw, 120px);
+}
+
+/* Media queries for mobile devices */
+@media screen and (max-width: 768px) {
+    .board {
+        width: 95vw;
+        margin: 10px auto;
+    }
+
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .controls-container {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    /* Adjust corner squares for better visibility */
+    .corner {
+        width: clamp(40px, 15vw, 60px) !important;
+        height: clamp(40px, 15vw, 60px) !important;
+    }
+
+    /* Enhance touch targets */
+    .square {
+        min-height: clamp(30px, 10vw, 50px);
+    }
+}
+
+/* Landscape mode optimizations */
+@media screen and (max-width: 768px) and (orientation: landscape) {
+    .board {
+        width: 70vh;
+        margin: 5px auto;
+    }
+
+    .game-container {
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: flex-start;
+    }
+
+    .controls-container {
+        width: 25%;
+        flex-direction: column;
+    }
+}
+
+/* Property cards and modals */
+.property-card {
+    font-size: clamp(10px, 2.5vw, 14px);
+    padding: clamp(8px, 2vw, 16px);
+    border-radius: 8px;
+    max-width: 90vw;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: clamp(10px, 3vw, 20px);
+}
+
+/* Game info and status */
+.game-info {
+    font-size: clamp(12px, 2.5vw, 16px);
+    margin: clamp(4px, 1vw, 8px);
+}
+
+.player-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(4px, 1vw, 8px);
+    justify-content: center;
+    margin: clamp(8px, 2vw, 16px) 0;
+}
+
+/* Dice and game pieces */
+.dice {
+    width: clamp(30px, 8vw, 50px);
+    height: clamp(30px, 8vw, 50px);
+    margin: clamp(4px, 1vw, 8px);
+}
+
+.house, .hotel {
+    width: clamp(8px, 2vw, 16px);
+    height: clamp(8px, 2vw, 16px);
 }
