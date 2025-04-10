@@ -768,50 +768,1165 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
     }, []);
 
     return (
-        <div className="game-container">
-            <div 
-                id="locations"
-                className="board"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={(e) => handleTouchEnd(e, null)}
-            >
-                {/* Board content */}
-                {props.elements.map((element, index) => (
+        <>
+            <div className="game" style={prop.tradeObj !== undefined ? { translate: "0px -100%" } : {}}>
+                <div style={{ overflowY: "hidden" }}>
+                    <div id="dice-panel" data-show={showDice}></div>
                     <div
-                        key={index}
-                        className={`square ${element.type}`}
+                        className="board"
                         style={{
-                            ...element.style,
-                            touchAction: 'manipulation'
+                            transform: `translateX(-50%) translateY(-50%) rotate(${rotation}deg) scale(${scale})`,
                         }}
-                        onTouchEnd={(e) => handleTouchEnd(e, element)}
+                        id="locations"
                     >
-                        {element.content}
+                        <div id="display-houses">
+                            <div
+                                data-position="39"
+                                data-rotate="4"
+                                className="street-houses"
+                                style={{
+                                    top: "83%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="37"
+                                data-rotate="4"
+                                className="street-houses"
+                                style={{
+                                    top: "66.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="35"
+                                data-rotate="4"
+                                className="street-houses"
+                                style={{
+                                    top: "50%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="34"
+                                data-rotate="4"
+                                className="street-houses"
+                                style={{
+                                    top: "41.75%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="32"
+                                data-rotate="4"
+                                className="street-houses"
+                                style={{
+                                    top: "25.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="31"
+                                data-rotate="4"
+                                className="street-houses"
+                                style={{
+                                    top: "17.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="29"
+                                data-rotate="3"
+                                className="street-houses"
+                                style={{
+                                    top: "6.5%",
+                                    left: "83%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="28"
+                                data-rotate="3"
+                                className="street-houses"
+                                style={{
+                                    top: "6.5%",
+                                    left: "74.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="27"
+                                data-rotate="3"
+                                className="street-houses"
+                                style={{
+                                    top: "6.5%",
+                                    left: "66.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="26"
+                                data-rotate="3"
+                                className="street-houses"
+                                style={{
+                                    top: "6.5%",
+                                    left: "58.25%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="25"
+                                data-rotate="3"
+                                className="street-houses"
+                                style={{
+                                    top: "6.5%",
+                                    left: "50%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="24"
+                                data-rotate="3"
+                                className="street-houses"
+                                style={{
+                                    top: "6.5%",
+                                    left: "41.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="23"
+                                data-rotate="3"
+                                className="street-houses"
+                                style={{
+                                    top: "6.5%",
+                                    left: "33.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="21"
+                                data-rotate="3"
+                                className="street-houses"
+                                style={{
+                                    top: "6.5%",
+                                    left: "17.25%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="19"
+                                data-rotate="2"
+                                className="street-houses"
+                                style={{
+                                    top: "17.25%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="18"
+                                data-rotate="2"
+                                className="street-houses"
+                                style={{
+                                    top: "25.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="16"
+                                data-rotate="2"
+                                className="street-houses"
+                                style={{
+                                    top: "41.75%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="15"
+                                data-rotate="2"
+                                className="street-houses"
+                                style={{
+                                    top: "50%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="14"
+                                data-rotate="2"
+                                className="street-houses"
+                                style={{
+                                    top: "58.25%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="13"
+                                data-rotate="2"
+                                className="street-houses"
+                                style={{
+                                    top: "66.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="12"
+                                data-rotate="2"
+                                className="street-houses"
+                                style={{
+                                    top: "74.75%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="11"
+                                data-rotate="2"
+                                className="street-houses"
+                                style={{
+                                    top: "83%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="9"
+                                data-rotate="1"
+                                className="street-houses"
+                                style={{
+                                    top: "93.5%",
+                                    left: "17.25%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="8"
+                                data-rotate="1"
+                                className="street-houses"
+                                style={{
+                                    top: "93.5%",
+                                    left: "25.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="6"
+                                data-rotate="1"
+                                className="street-houses"
+                                style={{
+                                    top: "93.5%",
+                                    left: "41.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="5"
+                                data-rotate="1"
+                                className="street-houses"
+                                style={{
+                                    top: "93.5%",
+                                    left: "50%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="3"
+                                data-rotate="1"
+                                className="street-houses"
+                                style={{
+                                    top: "93.5%",
+                                    left: "66.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="1"
+                                data-rotate="1"
+                                className="street-houses"
+                                style={{
+                                    top: "93.5%",
+                                    left: "83%",
+                                }}
+                            ></div>
+                        </div>
+                        <div id="display-streets">
+                            <div
+                                data-position="39"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "83%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="38"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "74.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="37"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "66.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="36"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "58.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="35"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "50%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="34"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "41.75%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="33"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "33.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="32"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "25.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="31"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "17.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="30"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="29"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "83%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="28"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "74.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="27"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "66.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="26"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "58.25%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="25"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "50%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="24"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "41.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="23"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "33.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="22"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "25.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="21"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "17.25%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="20"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="19"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "17.25%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="18"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "25.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="17"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "33.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="16"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "41.75%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="15"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "50%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="14"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "58.25%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="13"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "66.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="12"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "74.75%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="11"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "83%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                className="street"
+                                data-position="10"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="9"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "17.25%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="8"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "25.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="7"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "33.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="6"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "41.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="5"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "50%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="4"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "58.25%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="3"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "66.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="2"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "74.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="1"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "83%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="0"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                        </div>
                     </div>
-                ))}
-            </div>
-            
-            <div className="controls-container">
-                {/* Game controls */}
-                <div className="game-info">
-                    <div className="player-stats">
-                        {/* Player information */}
-                        {prop.myTurn && (
-                            <div className="action-buttons">
-                                <button 
-                                    className="action-button"
-                                    onClick={() => handleRoll()}
-                                    disabled={!prop.myTurn || sended}
-                                >
-                                    Roll Dice
-                                </button>
-                                {/* Other action buttons */}
-                            </div>
+                    <div className="action-bar" style={prop.myTurn && !sended ? {} : { translate: "-50% 20vh" }}>
+                        {prop.selectedMode.turnTimer !== undefined && prop.selectedMode.turnTimer > 0 ? (
+                            <>
+                                <p style={{ display: "inline-block", opacity: 1, color: "rgb(0, 114, 187)", marginRight: 5 }}>
+                                    {prop.selectedMode.turnTimer - timer}{" "}
+                                </p>
+                                <hr style={{ display: "inline", opacity: 0.5 }} />
+                            </>
+                        ) : (
+                            <></>
+                        )}
+                        <button data-button-type="roll" aria-disabled={false}>
+                            <p>ROLL THE </p>
+                            <img style={{ marginLeft: 10 }} src={RollIcon.replace("public/", "")} />
+                        </button>
+                        <button data-button-type="pay" data-tooltip-hover="pay" aria-disabled={true}>
+                            <img src="pay1.png" />
+                        </button>
+                        <button data-button-type="card" data-tooltip-hover="card" aria-disabled={true}>
+                            <img src="golden-card.png" />
+                        </button>
+                        {prop.selectedMode.AllowDeals ? (
+                            <button
+                                data-button-type="trade"
+                                data-tooltip-hover="trade"
+                                aria-disabled={false}
+                                onClick={() => {
+                                    SetSended(true);
+                                    prop.socket.emit("trade");
+                                }}
+                            >
+                                <img src="morgage.png" />
+                            </button>
+                        ) : (
+                            <></>
+                        )}
+                    </div>
+                    <div
+                        className={streetType === "Chance" || streetType === "CommunityChest" ? "chance-display-actions" : "card-display-actions"}
+                        style={
+                            !showStreet
+                                ? {
+                                      transform: "translateY(-50%) translateX(-70vw)",
+                                  }
+                                : {}
+                        }
+                    >
+                        {streetType === "Chance" || streetType === "CommunityChest" ? (
+                            <>
+                                {streetType === "Chance" ? (
+                                    <ChacneCard chance={streetDisplay as ChanceDisplayInfo} />
+                                ) : streetType === "CommunityChest" ? (
+                                    <ChacneCard chance={streetDisplay as ChanceDisplayInfo} />
+                                ) : (
+                                    <></>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <h3>{advnacedStreet ? "would you like to buy this card?" : "you can buy houses and hotels"}</h3>
+                                {streetType === "Railroad" ? (
+                                    <StreetCard railroad={streetDisplay as RailroadDisplayInfo} />
+                                ) : streetType === "Utilities" ? (
+                                    <StreetCard utility={streetDisplay as UtilitiesDisplayInfo} />
+                                ) : (
+                                    <StreetCard street={streetDisplay as StreetDisplayInfo} />
+                                )}
+                                <div>
+                                    <center>
+                                        {advnacedStreet ? (
+                                            <div id="advanced-responses"></div>
+                                        ) : (
+                                            <>
+                                                <button id="card-response-yes">YES</button>
+                                                <button id="card-response-no">NO</button>
+                                            </>
+                                        )}
+                                    </center>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                    <img data-anim="0" id="moneyAnimations" alt="" />
+                </div>
+                <div className="trade-table">
+                    <div className="middle">
+                        <h3>Trade</h3>
+                        {typeof prop.tradeObj !== "object" ? (
+                            <>
+                                <h2>Select your opponent</h2>
+                                <center>
+                                    <div className="select-players">
+                                        {prop.players
+                                            .filter((v) => v.id !== prop.socket.id)
+                                            .map((v, i) => (
+                                                <button
+                                                    style={{ animation: "tradepopout .3s cubic-bezier(0.21, 1.57, 0.55, 1)" }}
+                                                    data-selectable={prop.myTurn}
+                                                    key={i}
+                                                    onClick={() => {
+                                                        if (prop.myTurn) {
+                                                            prop.tradeApi.onSelectPlayer(v.id);
+                                                        }
+                                                    }}
+                                                >
+                                                    {v.username}
+                                                </button>
+                                            ))}
+                                        <button
+                                            data-selectable={prop.myTurn}
+                                            onClick={() => {
+                                                if (prop.myTurn) {
+                                                    prop.socket.emit("cancel-trade");
+                                                    SetSended(false);
+                                                }
+                                            }}
+                                        >
+                                            {" "}
+                                            CANCEL TRADE
+                                        </button>
+                                    </div>
+                                </center>
+                            </>
+                        ) : (
+                            <>
+                                <div className="trade-mission">
+                                    <div className="flexchild">
+                                        {prop.socket.id === prop.tradeObj.againstPlayer.id || prop.socket.id === prop.tradeObj.turnPlayer.id ? (
+                                            <div className="trade-craft">
+                                                <p>
+                                                    {" "}
+                                                    {prop.socket.id === prop.tradeObj.againstPlayer.id
+                                                        ? "You are the Opponent"
+                                                        : "You are the Current Player"}
+                                                </p>
+                                                <Slider
+                                                    max={
+                                                        prop.socket.id === prop.tradeObj.againstPlayer.id
+                                                            ? prop.players.filter((v) => v.id === (prop.tradeObj as GameTrading).againstPlayer.id)[0]
+                                                                  .balance
+                                                            : prop.players.filter((v) => v.id === (prop.tradeObj as GameTrading).turnPlayer.id)[0]
+                                                                  .balance
+                                                    }
+                                                    min={0}
+                                                    step={25}
+                                                    onChange={(e) => {
+                                                        const v = parseInt(e.currentTarget.value);
+                                                        const b = JSON.parse(JSON.stringify(prop.tradeObj)) as GameTrading;
+                                                        if (prop.socket.id === (prop.tradeObj as GameTrading).againstPlayer.id) {
+                                                            b.againstPlayer.balance = v;
+                                                        } else {
+                                                            b.turnPlayer.balance = v;
+                                                        }
+                                                        prop.socket.emit("trade-update", b);
+                                                    }}
+                                                    suffix=" M"
+                                                />
+                                                <br />
+
+                                                {prop.socket.id === prop.tradeObj.againstPlayer.id ? (
+                                                    prop.players
+                                                        .filter((v) => v.id === (prop.tradeObj as GameTrading).againstPlayer.id)[0]
+                                                        .properties.filter(
+                                                            (v) =>
+                                                                !(prop.tradeObj as GameTrading).againstPlayer.prop
+                                                                    .map((v) => JSON.stringify(v))
+                                                                    .includes(JSON.stringify(v))
+                                                        )
+                                                        .filter((v) => v.morgage === undefined || (v.morgage !== undefined && v.morgage === false))
+                                                        .map((v, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className="proprety-nav"
+                                                                onClick={() => {
+                                                                    const b = JSON.parse(JSON.stringify(prop.tradeObj)) as GameTrading;
+                                                                    b.againstPlayer.prop.push(v);
+                                                                    prop.socket.emit("trade-update", b);
+                                                                }}
+                                                            >
+                                                                <i
+                                                                    className="box"
+                                                                    style={{
+                                                                        backgroundColor: translateGroup(v.group),
+                                                                    }}
+                                                                ></i>
+                                                                <h3
+                                                                    style={
+                                                                        v.morgage !== undefined && v.morgage === true
+                                                                            ? { textDecoration: "line-through white" }
+                                                                            : {}
+                                                                    }
+                                                                >
+                                                                    {propretyMap.get(v.posistion)?.name ?? ""}
+                                                                </h3>
+                                                                <div>
+                                                                    {v.count == "h" ? (
+                                                                        <img src={HotelIcon.replace("public/", "")} alt="" />
+                                                                    ) : typeof v.count === "number" && v.count > 0 ? (
+                                                                        <>
+                                                                            <p>{v.count}</p>
+                                                                            <img src={HouseIcon.replace("public/", "")} alt="" />
+                                                                        </>
+                                                                    ) : (
+                                                                        <></>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                ) : prop.socket.id === prop.tradeObj.turnPlayer.id ? (
+                                                    prop.players
+                                                        .filter((v) => v.id === (prop.tradeObj as GameTrading).turnPlayer.id)[0]
+                                                        .properties.filter(
+                                                            (v) =>
+                                                                !(prop.tradeObj as GameTrading).turnPlayer.prop
+                                                                    .map((v) => JSON.stringify(v))
+                                                                    .includes(JSON.stringify(v))
+                                                        )
+                                                        .filter((v) => v.morgage === undefined || (v.morgage !== undefined && v.morgage === false))
+                                                        .map((v, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className="proprety-nav"
+                                                                onClick={() => {
+                                                                    const b = JSON.parse(JSON.stringify(prop.tradeObj)) as GameTrading;
+                                                                    b.turnPlayer.prop.push(v);
+                                                                    prop.socket.emit("trade-update", b);
+                                                                }}
+                                                            >
+                                                                <i
+                                                                    className="box"
+                                                                    style={{
+                                                                        backgroundColor: translateGroup(v.group),
+                                                                    }}
+                                                                ></i>
+                                                                <h3
+                                                                    style={
+                                                                        v.morgage !== undefined && v.morgage === true
+                                                                            ? { textDecoration: "line-through white" }
+                                                                            : {}
+                                                                    }
+                                                                >
+                                                                    {propretyMap.get(v.posistion)?.name ?? ""}
+                                                                </h3>
+                                                                <div>
+                                                                    {v.count == "h" ? (
+                                                                        <img src={HotelIcon.replace("public/", "")} alt="" />
+                                                                    ) : typeof v.count === "number" && v.count > 0 ? (
+                                                                        <>
+                                                                            <p>{v.count}</p>
+                                                                            <img src={HouseIcon.replace("public/", "")} alt="" />
+                                                                        </>
+                                                                    ) : (
+                                                                        <></>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
+
+                                    <div className="flexchild">
+                                        <div className="player">
+                                            <h5>
+                                                current player{" "}
+                                                <h2>
+                                                    {prop.players.filter((v) => v.id === (prop.tradeObj as GameTrading).turnPlayer.id)[0].username}
+                                                </h2>
+                                            </h5>
+                                            <table>
+                                                <tr>
+                                                    <td>Balance</td>
+                                                    <td>{prop.tradeObj.turnPlayer.balance} M</td>
+                                                </tr>
+                                                {prop.tradeObj.turnPlayer.prop.length > 0 ? (
+                                                    <tr>
+                                                        <td>Propreties</td>
+                                                        <td>
+                                                            {prop.tradeObj.turnPlayer.prop.map((v, i) => (
+                                                                <div
+                                                                    key={i}
+                                                                    className="proprety-nav"
+                                                                    data-actionable={prop.socket.id === (prop.tradeObj as GameTrading).turnPlayer.id}
+                                                                    onClick={() => {
+                                                                        if (prop.socket.id === (prop.tradeObj as GameTrading).turnPlayer.id) {
+                                                                            const b = JSON.parse(JSON.stringify(prop.tradeObj)) as GameTrading;
+                                                                            b.turnPlayer.prop.splice(i, 1);
+                                                                            prop.socket.emit("trade-update", b);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <i
+                                                                        className="box"
+                                                                        style={{
+                                                                            backgroundColor: translateGroup(v.group),
+                                                                        }}
+                                                                    ></i>
+                                                                    <h3
+                                                                        style={
+                                                                            v.morgage !== undefined && v.morgage === true
+                                                                                ? { textDecoration: "line-through white" }
+                                                                                : {}
+                                                                        }
+                                                                    >
+                                                                        {propretyMap.get(v.posistion)?.name ?? ""}
+                                                                    </h3>
+                                                                    <div>
+                                                                        {v.count == "h" ? (
+                                                                            <img src={HotelIcon.replace("public/", "")} alt="" />
+                                                                        ) : typeof v.count === "number" && v.count > 0 ? (
+                                                                            <>
+                                                                                <p>{v.count}</p>
+                                                                                <img src={HouseIcon.replace("public/", "")} alt="" />
+                                                                            </>
+                                                                        ) : (
+                                                                            <></>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </table>
+                                        </div>
+                                        <div className="player">
+                                            <h5>
+                                                opponent player
+                                                <h2>
+                                                    {prop.players.filter((v) => v.id === (prop.tradeObj as GameTrading).againstPlayer.id)[0].username}
+                                                </h2>
+                                            </h5>
+                                            <table>
+                                                <tr>
+                                                    <td>Balance</td>
+                                                    <td>{prop.tradeObj.againstPlayer.balance} M</td>
+                                                </tr>
+                                                {prop.tradeObj.againstPlayer.prop.length > 0 ? (
+                                                    <tr>
+                                                        <td>Propreties</td>
+                                                        <td>
+                                                            {prop.tradeObj.againstPlayer.prop.map((v, i) => (
+                                                                <div
+                                                                    key={i}
+                                                                    data-actionable={
+                                                                        prop.socket.id === (prop.tradeObj as GameTrading).againstPlayer.id
+                                                                    }
+                                                                    className="proprety-nav"
+                                                                    onClick={() => {
+                                                                        if (prop.socket.id === (prop.tradeObj as GameTrading).againstPlayer.id) {
+                                                                            const b = JSON.parse(JSON.stringify(prop.tradeObj)) as GameTrading;
+                                                                            b.againstPlayer.prop.splice(i, 1);
+                                                                            prop.socket.emit("trade-update", b);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <i
+                                                                        className="box"
+                                                                        style={{
+                                                                            backgroundColor: translateGroup(v.group),
+                                                                        }}
+                                                                    ></i>
+                                                                    <h3
+                                                                        style={
+                                                                            v.morgage !== undefined && v.morgage === true
+                                                                                ? { textDecoration: "line-through white" }
+                                                                                : {}
+                                                                        }
+                                                                    >
+                                                                        {propretyMap.get(v.posistion)?.name ?? ""}
+                                                                    </h3>
+                                                                    <div>
+                                                                        {v.count == "h" ? (
+                                                                            <img src={HotelIcon.replace("public/", "")} alt="" />
+                                                                        ) : typeof v.count === "number" && v.count > 0 ? (
+                                                                            <>
+                                                                                <p>{v.count}</p>
+                                                                                <img src={HouseIcon.replace("public/", "")} alt="" />
+                                                                            </>
+                                                                        ) : (
+                                                                            <></>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div className="flexchild"></div>
+                                </div>
+
+                                {prop.myTurn ? (
+                                    <center>
+                                        <div className="trade-craft-buttons">
+                                            <button
+                                                data-selectable={prop.myTurn}
+                                                onClick={() => {
+                                                    if (prop.myTurn) {
+                                                        prop.socket.emit("cancel-trade");
+                                                        SetSended(false);
+                                                    }
+                                                }}
+                                            >
+                                                {" "}
+                                                CANCEL
+                                            </button>
+                                            <button
+                                                data-selectable={prop.myTurn}
+                                                onClick={() => {
+                                                    if (prop.myTurn) {
+                                                        prop.socket.emit("trade");
+                                                    }
+                                                }}
+                                            >
+                                                {" "}
+                                                BACK
+                                            </button>
+                                            <button
+                                                data-selectable={prop.myTurn}
+                                                onClick={() => {
+                                                    if (prop.myTurn) {
+                                                        prop.socket.emit("submit-trade", prop.tradeObj);
+                                                        SetSended(false);
+                                                    }
+                                                }}
+                                            >
+                                                {" "}
+                                                SUBMIT
+                                            </button>
+                                        </div>
+                                    </center>
+                                ) : (prop.tradeObj as GameTrading).againstPlayer.id === prop.socket.id ? (
+                                    <center>
+                                        <div className="trade-craft-buttons">
+                                            <button
+                                                data-selectable={prop.myTurn}
+                                                onClick={() => {
+                                                    prop.socket.emit("trade");
+                                                }}
+                                            >
+                                                {" "}
+                                                CANCEL
+                                            </button>
+                                        </div>
+                                    </center>
+                                ) : (
+                                    <></>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 });
 export default MonopolyGame;
