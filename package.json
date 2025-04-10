@@ -1,5 +1,5 @@
 {
-    "homepage": "https://itaylayzer.github.io/Monopoly/",
+    "homepage": "https://skolr7780.github.io/Mon/",
     "name": "monopolyclient",
     "private": true,
     "version": "0.0.0",
@@ -8,7 +8,7 @@
         "dev": "vite",
         "dev:server": "node server/peer-server.js",
         "dev:app": "vite",
-        "build": "tsc && vite build && cp docs/index.html docs/404.html",
+        "build": "tsc && vite build && copy docs\\index.html docs\\404.html",
         "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview"
     },
