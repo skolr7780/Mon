@@ -4,20 +4,23 @@ import { BrowserRouter as Router, Route, Routes, RouterProvider, createBrowserRo
 import Gallery from "./Pages/Galery/gallery.tsx";
 import Home from "./Pages/Home/home.tsx";
 import Users from "./Pages/Users/users.tsx";
+
 const router = createBrowserRouter([
     {
-        path: "Monopoly",
+        path: "/Mon",
         element: <Home />,
     },
     {
-        path: "Monopoly/gallery",
+        path: "/Mon/gallery",
         element: <Gallery />,
     },
     {
-        path: "/Monopoly/users",
+        path: "/Mon/users",
         element: <Users />,
     },
-]);
+], {
+    basename: "/Mon"
+});
 
 function App() {
     return <RouterProvider router={router} />;
