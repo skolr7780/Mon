@@ -71,6 +71,9 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
     const [touchStartX, setTouchStartX] = useState(0);
     const [touchStartY, setTouchStartY] = useState(0);
     const [isTouchMoving, setIsTouchMoving] = useState(false);
+    const touchTimeout = useRef<NodeJS.Timeout>();
+    const lastTapTime = useRef(0);
+    const boardRef = useRef<HTMLDivElement>(null);
 
     const handleClick = (element: any) => {
         if (!element) return;
@@ -81,41 +84,118 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
 
     const handleTouchStart = (e: React.TouchEvent) => {
         if (!prop.myTurn) return;
-        setTouchStartX(e.touches[0].clientX);
-        setTouchStartY(e.touches[0].clientY);
+        
+        const touch = e.touches[0];
+        setTouchStartX(touch.clientX);
+        setTouchStartY(touch.clientY);
         setIsTouchMoving(false);
+
+        // Handle double tap
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTapTime.current;
+        
+        if (tapLength < 300 && tapLength > 0) {
+            e.preventDefault();
+            handleDoubleTap(e);
+        }
+        lastTapTime.current = currentTime;
+
+        if (touchTimeout.current) {
+            clearTimeout(touchTimeout.current);
+        }
     };
 
     const handleTouchMove = (e: React.TouchEvent) => {
         if (!prop.myTurn) return;
-        const touchCurrentX = e.touches[0].clientX;
-        const touchCurrentY = e.touches[0].clientY;
         
-        const deltaX = Math.abs(touchCurrentX - touchStartX);
-        const deltaY = Math.abs(touchCurrentY - touchStartY);
+        const touch = e.touches[0];
+        const deltaX = Math.abs(touch.clientX - touchStartX);
+        const deltaY = Math.abs(touch.clientY - touchStartY);
         
-        // If movement is greater than threshold, consider it a scroll
         if (deltaX > 5 || deltaY > 5) {
             setIsTouchMoving(true);
+        }
+
+        // Handle pinch zoom if multiple touches
+        if (e.touches.length === 2) {
+            handlePinchZoom(e);
         }
     };
 
     const handleTouchEnd = (e: React.TouchEvent, element: any) => {
-        if (!prop.myTurn) return;
-        if (isTouchMoving) return; // Prevent click if user was scrolling
+        if (!prop.myTurn || isTouchMoving) return;
 
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
-        
-        // Calculate distance moved
-        const deltaX = Math.abs(touchEndX - touchStartX);
-        const deltaY = Math.abs(touchEndY - touchStartY);
+        const touch = e.changedTouches[0];
+        const deltaX = Math.abs(touch.clientX - touchStartX);
+        const deltaY = Math.abs(touch.clientY - touchStartY);
 
-        // If movement is small enough, treat it as a tap
         if (deltaX < 10 && deltaY < 10) {
             handleClick(element);
         }
     };
+
+    const handleDoubleTap = (e: React.TouchEvent) => {
+        // Reset zoom level on double tap
+        SetScale(1);
+        SetRotation(0);
+    };
+
+    const handlePinchZoom = (e: React.TouchEvent) => {
+        if (e.touches.length !== 2) return;
+
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        
+        // Calculate distance between touches
+        const distance = Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+        );
+
+        // Update scale based on pinch distance
+        const newScale = Math.min(Math.max(scale + (distance / 500), 0.5), 2);
+        SetScale(newScale);
+    };
+
+    // Board rotation for landscape mode
+    useEffect(() => {
+        const handleOrientation = () => {
+            if (window.matchMedia("(orientation: landscape)").matches) {
+                SetRotation(0);
+            } else {
+                SetRotation(0);
+            }
+        };
+
+        window.addEventListener('orientationchange', handleOrientation);
+        handleOrientation(); // Initial check
+
+        return () => {
+            window.removeEventListener('orientationchange', handleOrientation);
+        };
+    }, []);
+
+    // Add passive touch listeners for better performance
+    useEffect(() => {
+        const board = boardRef.current;
+        if (!board) return;
+
+        const options = { passive: true };
+        
+        const touchStartHandler = (e: TouchEvent) => handleTouchStart(e as any);
+        const touchMoveHandler = (e: TouchEvent) => handleTouchMove(e as any);
+        const touchEndHandler = (e: TouchEvent) => handleTouchEnd(e as any, null);
+
+        board.addEventListener('touchstart', touchStartHandler, options);
+        board.addEventListener('touchmove', touchMoveHandler, options);
+        board.addEventListener('touchend', touchEndHandler, options);
+
+        return () => {
+            board.removeEventListener('touchstart', touchStartHandler);
+            board.removeEventListener('touchmove', touchMoveHandler);
+            board.removeEventListener('touchend', touchEndHandler);
+        };
+    }, [prop.myTurn]);
 
     useEffect(() => {
         const settings_interval = setInterval(() => {
@@ -769,24 +849,6 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
             console.log("stopped");
         };
     }, [prop.myTurn, sended, prop.selectedMode]);
-
-    useEffect(() => {
-        // Add touch event passive listeners for better scrolling performance
-        const options = { passive: true };
-        const board = document.getElementById("locations") as HTMLDivElement;
-
-        if (board) {
-            board.addEventListener('touchstart', handleTouchStart as any, options);
-            board.addEventListener('touchmove', handleTouchMove as any, options);
-            board.addEventListener('touchend', (e: TouchEvent) => handleTouchEnd(e as any, null), options);
-            
-            return () => {
-                board.removeEventListener('touchstart', handleTouchStart as any);
-                board.removeEventListener('touchmove', handleTouchMove as any);
-                board.removeEventListener('touchend', (e: TouchEvent) => handleTouchEnd(e as any, null));
-            };
-        }
-    }, [prop.myTurn]);
 
     return (
         <>
