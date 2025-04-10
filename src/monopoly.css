@@ -1839,115 +1839,243 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
     }
 }
 
-/* Responsive Design for Mobile Devices */
-@media only screen and (max-width: 768px) {
+/* Base Mobile Styles */
+@media screen and (max-width: 768px) {
     div.board {
-        transform: scale(0.7);
-        margin: -15% auto;
+        width: 100vw;
+        max-width: 500px;
+        transform: scale(0.6);
+        margin: 0 auto;
+        position: relative;
+        top: -10%;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        touch-action: manipulation; /* Disable double-tap zoom */
+    }
+
+    main {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
     }
 
     main nav.main {
         width: 100%;
-        height: auto;
-        flex-direction: column;
+        position: relative;
+        z-index: 10;
+        touch-action: manipulation;
     }
 
     main nav.content {
         width: 100%;
-        height: auto;
-        margin-top: 10px;
+        padding: 10px;
+        box-sizing: border-box;
+        -webkit-overflow-scrolling: touch;
     }
 
     div.action-bar {
         position: fixed;
-        bottom: 0;
+        bottom: env(safe-area-inset-bottom, 0); /* Support for iPhone notch */
         left: 0;
         width: 100%;
         padding: 10px;
-        background: rgba(255, 255, 255, 0.9);
+        box-sizing: border-box;
+        background: rgba(20, 20, 20, 0.95);
         backdrop-filter: blur(10px);
+        border-radius: 0;
         z-index: 1000;
-    }
-
-    div.card-display-actions {
-        width: 90%;
-        margin: 10px auto;
-    }
-
-    main nav.content[data-index="2"] div.main-chat {
-        height: 60vh;
-    }
-
-    div.game div.trade-table {
-        width: 95%;
-        height: 90%;
-    }
-}
-
-/* iPad Specific Adjustments */
-@media only screen and (min-width: 768px) and (max-width: 1024px) {
-    div.board {
-        transform: scale(0.85);
-        margin: -10% auto;
-    }
-
-    main nav.main {
-        width: 100%;
-    }
-
-    div.card-display-actions {
-        width: 80%;
-    }
-}
-
-/* iPhone 11 and newer Specific Adjustments */
-@media only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-min-device-pixel-ratio: 3) {
-    div.board {
-        transform: scale(0.6);
-        margin: -20% auto;
-    }
-
-    main nav.main nav.header div.button {
-        padding: 8px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
     }
 
     div.action-bar button {
-        padding: 8px;
-        font-size: 14px;
+        padding: 12px 20px; /* Larger touch targets */
+        font-size: 16px;
+        height: auto;
+        white-space: nowrap;
+        min-height: 44px; /* iOS minimum touch target size */
+    }
+
+    div.card-display-actions {
+        width: 90%;
+        max-width: 300px;
+        min-height: auto;
+        padding: 15px;
+        touch-action: manipulation;
     }
 
     div.street-card {
-        width: 90%;
-        margin: 10px auto;
+        min-height: 350px;
+        max-height: 350px;
+        touch-action: manipulation;
     }
 
-    main nav.content div.propertyList {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    div.chance-card {
+        min-width: 300px;
+        max-width: 300px;
+        touch-action: manipulation;
+    }
+
+    main nav.content[data-index="2"] div.main-chat {
+        height: calc(50vh - env(safe-area-inset-bottom, 0));
+        margin-bottom: 70px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    div.propertyList {
+        margin-bottom: calc(70px + env(safe-area-inset-bottom, 0));
+        -webkit-overflow-scrolling: touch;
+    }
+
+    div.game div.trade-table div.trade-mission {
+        width: 95%;
+        flex-direction: column;
+        gap: 20px;
+        touch-action: manipulation;
+    }
+
+    div.game div.trade-table div.trade-mission div.flexchild {
+        flex-direction: column;
+    }
+
+    /* Add support for landscape mode */
+    @media (orientation: landscape) {
+        div.board {
+            transform: scale(0.5);
+            top: -15%;
+        }
+
+        main nav.content[data-index="2"] div.main-chat {
+            height: calc(40vh - env(safe-area-inset-bottom, 0));
+        }
     }
 }
 
-/* Landscape Mode Adjustments */
-@media only screen and (max-height: 500px) and (orientation: landscape) {
+/* iPad/Tablet Styles */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
     div.board {
-        transform: scale(0.5);
-        margin: -25% auto;
+        width: 700px;
+        transform: scale(0.8);
+        margin: -5% auto;
+    }
+
+    main nav.main {
+        width: 320px;
+    }
+
+    div.card-display-actions {
+        width: 300px;
+    }
+
+    div.action-bar {
+        bottom: 5%;
+    }
+
+    div.game div.trade-table div.trade-mission {
+        width: 90%;
+    }
+}
+
+/* iPhone 11+ Specific */
+@media screen and (min-device-width: 375px) and (max-device-width: 896px) and (-webkit-min-device-pixel-ratio: 2) {
+    div.board {
+        transform: scale(0.55);
+        top: -15%;
+    }
+
+    main nav.main nav.header div.button {
+        height: 35px;
+        margin-bottom: 10px;
+    }
+
+    div.action-bar button {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    div.card-display-actions {
+        transform: translateY(-40%) translateX(-50%);
+    }
+
+    div.dialog-box {
+        width: 90%;
+        padding: 30px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+}
+
+/* Landscape Mode */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    div.board {
+        transform: scale(0.45);
+        top: -25%;
+    }
+
+    main {
+        flex-direction: row;
+    }
+
+    main nav.main {
+        width: 280px;
+        height: 100vh;
     }
 
     div.action-bar {
         padding: 5px;
+        bottom: 10px;
     }
 
-    main nav.content[data-index="2"] div.main-chat {
-        height: 50vh;
+    div.card-display-actions {
+        transform: translateY(-50%) translateX(-50%) scale(0.8);
     }
 }
 
-/* High DPI Screens (Retina Display) */
+/* High DPI/Retina Optimizations */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    div.board,
+    div.street-card,
+    div.chance-card {
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        -webkit-transform-style: preserve-3d;
+        transform-style: preserve-3d;
+    }
+
     div.board div.street img,
     div.player img,
     div.action-bar button img {
         image-rendering: -webkit-optimize-contrast;
         image-rendering: crisp-edges;
+    }
+}
+
+/* Touch Input Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    div.action-bar button,
+    main nav.main nav.header div.button,
+    div.proprety-nav,
+    div.card-display-actions div button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    div.dialog-box div.buttons button {
+        padding: 10px 30px;
+        margin: 5px;
+    }
+
+    input, select, button {
+        font-size: 16px;
+    }
+}
+
+/* Safe Area Insets for Modern Devices */
+@supports (padding: max(0px)) {
+    div.action-bar {
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
     }
 }

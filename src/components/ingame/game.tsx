@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState, useRef } from "react";
 import RollIcon from "../../../public/roll.png";
 import HouseIcon from "../../../public/h.png";
 import HotelIcon from "../../../public/ho.png";
@@ -68,6 +68,36 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
     const [scale, SetScale] = useState<number>(1);
     const [settings, SetSettings] = useState<MonopolySettings>();
     const [timer, SetTimer] = useState<number>(0);
+    const [touchStartX, setTouchStartX] = useState(0);
+    const [touchStartY, setTouchStartY] = useState(0);
+    const [isTouchMoving, setIsTouchMoving] = useState(false);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStartX(e.touches[0].clientX);
+        setTouchStartY(e.touches[0].clientY);
+        setIsTouchMoving(false);
+    };
+
+    const handleTouchMove = () => {
+        setIsTouchMoving(true);
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent, element: any) => {
+        if (isTouchMoving) return; // Prevent click if user was scrolling
+
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        
+        // Calculate distance moved
+        const deltaX = Math.abs(touchEndX - touchStartX);
+        const deltaY = Math.abs(touchEndY - touchStartY);
+
+        // If movement is small enough, treat it as a tap
+        if (deltaX < 10 && deltaY < 10) {
+            handleClick(element);
+        }
+    };
+
     useEffect(() => {
         const settings_interval = setInterval(() => {
             SetSettings((JSON.parse(decodeURIComponent(CookieManager.get("monopolySettings") as string)) as MonopolyCookie).settings);
@@ -720,6 +750,23 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
             console.log("stopped");
         };
     }, [prop.myTurn, sended, prop.selectedMode]);
+
+    useEffect(() => {
+        // Add touch event passive listeners for better scrolling performance
+        const options = { passive: true };
+        const board = document.getElementById("locations") as HTMLDivElement;
+
+        if (board) {
+            board.addEventListener('touchstart', handleTouchStart as any, options);
+            board.addEventListener('touchmove', handleTouchMove as any, options);
+            
+            return () => {
+                board.removeEventListener('touchstart', handleTouchStart as any);
+                board.removeEventListener('touchmove', handleTouchMove as any);
+            };
+        }
+    }, []);
+
     return (
         <>
             <div className="game" style={prop.tradeObj !== undefined ? { translate: "0px -100%" } : {}}>
