@@ -7,15 +7,15 @@ import Users from "./Pages/Users/users.tsx";
 
 const router = createBrowserRouter([
     {
-        path: "/Mon",
+        path: "/",
         element: <Home />,
     },
     {
-        path: "/Mon/gallery",
+        path: "/gallery",
         element: <Gallery />,
     },
     {
-        path: "/Mon/users",
+        path: "/users",
         element: <Users />,
     },
 ], {

@@ -7,7 +7,12 @@ export default defineConfig({
     plugins: [react(), basicSsl()],
     build: {
         outDir: "docs",
-        emptyOutDir: true
+        emptyOutDir: true,
+        rollupOptions: {
+            output: {
+                manualChunks: undefined
+            }
+        }
     },
     base: "/Mon/",
     server: {
