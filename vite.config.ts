@@ -9,8 +9,9 @@ export default defineConfig({
         outDir: "docs",
         emptyOutDir: true
     },
-    base: "/Monopoly/",
+    base: "/Mon/",
     server: {
         https: true,
     }
 });
+

@@ -25,3 +25,4 @@ function App() {
 
 document.title = "Monopoly";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(<App />);
+
