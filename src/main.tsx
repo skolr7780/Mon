@@ -59,6 +59,15 @@ const initMobileOptimizations = () => {
                     menu.getAttribute('data-visible') === 'true' ? 'false' : 'true'
                 );
             });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (menu.getAttribute('data-visible') === 'true' && 
+                    !menu.contains(e.target as Node) && 
+                    !menuButton.contains(e.target as Node)) {
+                    menu.setAttribute('data-visible', 'false');
+                }
+            });
         }
     };
 
@@ -100,6 +109,12 @@ const initMobileOptimizations = () => {
             document.documentElement.style.minHeight = '100%';
             document.body.style.height = '100%';
             document.body.style.minHeight = '100%';
+        }
+
+        // Show mobile menu button
+        const menuButton = document.querySelector('.menu-button');
+        if (menuButton) {
+            (menuButton as HTMLElement).style.display = 'flex';
         }
     }
 };
