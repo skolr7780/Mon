@@ -130,7 +130,6 @@
 
 /* iOS specific optimizations */
 @supports (-webkit-touch-callout: none) {
-    /* iOS specific styles */
     body {
         -webkit-overflow-scrolling: touch;
         overscroll-behavior-y: none;
@@ -145,12 +144,10 @@
         padding-bottom: max(env(safe-area-inset-bottom), 10px);
     }
 
-    /* Fix for iOS input zoom */
     input, select, textarea {
         font-size: 16px;
     }
 
-    /* Fix for iOS button highlight */
     button {
         -webkit-appearance: none;
         -webkit-tap-highlight-color: transparent;
