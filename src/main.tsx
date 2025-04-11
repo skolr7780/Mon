@@ -40,6 +40,14 @@ const initMobileOptimizations = () => {
         });
     };
 
+    // Handle orientation changes
+    const handleOrientationChange = () => {
+        setTimeout(() => {
+            setVhProperty();
+            window.scrollTo(0, 0);
+        }, 100);
+    };
+
     // Detect mobile devices
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -49,9 +57,7 @@ const initMobileOptimizations = () => {
         // Add vh variable
         setVhProperty();
         window.addEventListener('resize', setVhProperty);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(setVhProperty, 100);
-        });
+        window.addEventListener('orientationchange', handleOrientationChange);
         
         // Add touch optimizations
         addTouchStartListener();
@@ -64,6 +70,19 @@ const initMobileOptimizations = () => {
         
         if (isIOS) {
             document.documentElement.classList.add('ios-device');
+            
+            // iOS specific optimizations
+            document.body.style.overscrollBehaviorY = 'none';
+            (document.body.style as any).webkitOverflowScrolling = 'touch';
+            
+            // Prevent pull-to-refresh
+            document.body.style.overscrollBehavior = 'none';
+            
+            // Fix for iOS 100vh issue
+            document.documentElement.style.height = '100%';
+            document.documentElement.style.minHeight = '100%';
+            document.body.style.height = '100%';
+            document.body.style.minHeight = '100%';
         }
     }
 };
