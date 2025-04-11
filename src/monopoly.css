@@ -53,6 +53,12 @@
 }
 
 @font-face {
+    font-family: "Josefin Sans";
+    src: url(./assets/fonts/JosefinSans-Thin.ttf);
+    font-weight: 300;
+}
+
+@font-face {
     font-family: "Courier Prime";
     src: url(./assets/fonts/CourierPrime-Regular.ttf);
     font-weight: 400;
@@ -80,126 +86,6 @@
     font-style: normal;
 }
 
-/* CSS Variables for responsive design */
-:root {
-    /* Device sizes */
-    --mobile-width: 428px;
-    --tablet-width: 768px;
-    --desktop-width: 1024px;
-    --ipad-pro-width: 1366px;
-
-    /* Board sizes */
-    --board-size-mobile: min(95vw, 95vh);
-    --board-size-tablet: min(85vw, 85vh);
-    --board-size-desktop: 900px;
-    --board-size-ipad-pro: 1000px;
-
-    /* UI Elements */
-    --action-bar-height: clamp(50px, 8vh, 60px);
-    --button-size: clamp(44px, 8vw, 60px);
-    --card-width: clamp(250px, 90vw, 400px);
-    --property-card-height: clamp(350px, 70vh, 450px);
-    --menu-width: clamp(300px, 90vw, 400px);
-    
-    /* Safe areas */
-    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-area-top: env(safe-area-inset-top, 0px);
-    --safe-area-left: env(safe-area-inset-left, 0px);
-    --safe-area-right: env(safe-area-inset-right, 0px);
-    
-    /* Touch targets */
-    --min-touch-target: 44px;
-    
-    /* Animations */
-    --transition-speed: 0.3s;
-    --transition-timing: cubic-bezier(0.21, 1.57, 0.55, 1);
-}
-
-/* Base styles for touch optimization */
-* {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    box-sizing: border-box;
-    -webkit-text-size-adjust: 100%;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Ensure proper viewport on mobile */
-@viewport {
-    width: device-width;
-    initial-scale: 1;
-    maximum-scale: 1;
-    user-scalable: no;
-}
-
-/* iOS specific optimizations */
-@supports (-webkit-touch-callout: none) {
-    body {
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: none;
-        height: -webkit-fill-available;
-        min-height: -webkit-fill-available;
-    }
-
-    .board {
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: none;
-        touch-action: pan-x pan-y;
-    }
-
-    .action-bar {
-        padding-bottom: max(env(safe-area-inset-bottom), 10px);
-        position: sticky;
-        bottom: 0;
-        z-index: 10;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-
-    input, select, textarea {
-        font-size: 16px;
-        transform: scale(1);
-        -webkit-appearance: none;
-    }
-
-    button {
-        -webkit-appearance: none;
-        -webkit-tap-highlight-color: transparent;
-        min-height: var(--min-touch-target);
-        min-width: var(--min-touch-target);
-    }
-    
-    .game-container {
-        -webkit-overflow-scrolling: touch;
-        height: -webkit-fill-available;
-        min-height: -webkit-fill-available;
-    }
-    
-    .dialog-box, .notification {
-        padding-top: max(env(safe-area-inset-top), 10px);
-        padding-left: max(env(safe-area-inset-left), 10px);
-        padding-right: max(env(safe-area-inset-right), 10px);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-    
-    * {
-        touch-action: manipulation;
-    }
-}
-
-/* Game container layout */
-.game-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: var(--safe-area-top) env(safe-area-inset-right) var(--safe-area-bottom) env(safe-area-inset-left);
-}
 
 body {
     font-family: "Josefin Sans";
@@ -510,7 +396,6 @@ div.dialog-box div.buttons button:active {
     }
 }
 
-/* Main layout */
 main {
     position: absolute;
     top: 0;
@@ -520,72 +405,18 @@ main {
     display: flex;
     overflow: hidden;
     font-family: "Josefin Sans";
-    -webkit-overflow-scrolling: touch;
 }
 
 input {
     font-family: "Josefin Sans";
 }
 
-/* Navigation menu */
 main nav.main {
-    width: var(--menu-width);
+    width: 400px;
     justify-content: flex-start;
     display: flex;
     z-index: 3;
     background-color: #cde6d0;
-    transition: transform 0.3s ease;
-}
-
-/* Mobile menu styles */
-@media screen and (max-width: var(--mobile-width)) {
-    main nav.main {
-        width: 100%;
-        height: 100%;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 100;
-        transform: translateX(-100%);
-        transition: transform var(--transition-speed) var(--transition-timing);
-    }
-
-    main nav.main[data-visible="true"] {
-        transform: translateX(0);
-    }
-
-    main nav.main nav.header {
-        width: 100%;
-        height: var(--action-bar-height);
-        flex-direction: row;
-        padding: 10px;
-        background-color: rgb(20, 20, 20);
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 101;
-    }
-
-    main nav.main nav.header div.upper {
-        display: flex;
-        flex-direction: row;
-        padding-top: 0;
-        gap: 10px;
-    }
-
-    main nav.main nav.header div.button {
-        margin-bottom: 0;
-        margin-inline: 5px;
-    }
-
-    main nav.content {
-        margin-top: var(--action-bar-height);
-        padding-top: var(--safe-area-top);
-        padding-bottom: var(--safe-area-bottom);
-        height: calc(100% - var(--action-bar-height));
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
 }
 
 main nav.main nav.header {
@@ -1028,21 +859,18 @@ div.message p:nth-child(2) {
     padding-left: 10px;
 }
 
-/* Board layout */
 div.board {
     aspect-ratio: 1;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
-    width: var(--board-size-desktop);
+    width: 900px;
     background-image: url("/board2.png");
     background-size: cover;
     box-shadow: 0px 0px 0px 3px black;
     z-index: 0;
     transition: transform 0.1s ease-out;
-    touch-action: manipulation;
-    -webkit-overflow-scrolling: touch;
 }
 
 div.board div#display-houses div.street-houses {
@@ -1106,35 +934,77 @@ div.board div.street {
     transition: background-color 0.1s ease-out;
 }
 
-/* Action bar */
 div.action-bar {
-    position: fixed;
-    bottom: max(var(--safe-area-bottom), 10px);
-    left: 0;
-    width: 100%;
-    padding: 10px;
-    background: rgba(20, 20, 20, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+    position: absolute;
+    bottom: 10%;
+    height: 50spx;
+    width: fit-content;
+    left: 50%;
+    background-color: rgba(20, 20, 20, 100);
+    translate: -50% 0px;
+    transition: translate 0.3s cubic-bezier(0.21, 1.57, 0.55, 1);
     border-radius: 10px;
+    padding-inline: 10px;
 }
 
 div.action-bar button {
-    min-height: var(--min-touch-target);
-    min-width: var(--min-touch-target);
-    padding: 12px;
-    font-size: 16px;
+
     background-color: rgba(0, 0, 0, 0%);
     color: white;
     border-radius: 7px;
+    font-size: 15px;
     text-align: center;
+    height: 50px;
     display: inline-block;
     opacity: 0.7;
     transition: scale 0.3s cubic-bezier(0.21, 1.57, 0.55, 1), opacity 0.5s ease-out;
+    pointer-events: all;
+
+}
+
+div.action-bar button:hover {
+    scale: 0.9;
+    cursor: pointer;
+    opacity: 1;
+}
+
+div.action-bar button[aria-disabled="true"] {
+    cursor: wait;
+    filter: grayscale(1) blur(2px);
+    animation: spin1 1s cubic-bezier(0.68, 0.05, 0.49, 0.95) infinite;
+    border: 0;
+}
+
+
+div.action-bar button * {
+    display: inline-block;
+}
+
+div.action-bar button p {
+    font-family: "Josefin Sans";
+    margin-block: auto;
+}
+
+div.action-bar button[aria-disabled="false"] {
+    box-shadow: 0;
+    outline: 0;
+    border: 0;
+}
+
+
+div.action-bar button img {
+    height: 20px;
+    scale: 1.5;
+    translate: 0px 3px;
+    margin-inline: 5px;
+}
+
+div.action-bar button[data-button-type][aria-disabled="true"] {
+    opacity: 0;
+    visibility: hidden;
+    width: 0px;
+    padding: 0;
+    margin: 0;
 }
 
 div.player {
@@ -1973,228 +1843,4 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
         scale: 1 1;
         height: 23px;
     }
-}
-
-/* iPhone and small devices */
-@media screen and (max-width: var(--mobile-width)) {
-    .game-container {
-        height: 100vh;
-        min-height: 100vh;
-        padding: var(--safe-area-top) var(--safe-area-right) var(--safe-area-bottom) var(--safe-area-left);
-    }
-
-    div.board {
-        width: var(--board-size-mobile);
-        height: var(--board-size-mobile);
-        margin: 0 auto;
-    }
-
-    .action-bar {
-        height: var(--action-bar-height);
-        width: 100%;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        padding: 0 var(--safe-area-right) 0 var(--safe-area-left);
-        background-color: rgba(255, 255, 255, 0.9);
-    }
-
-    .action-bar button {
-        width: var(--button-size);
-        height: var(--button-size);
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .card-display-actions {
-        width: 100%;
-        max-width: var(--card-width);
-        margin: 0 auto;
-        padding: var(--safe-area-top) var(--safe-area-right) var(--safe-area-bottom) var(--safe-area-left);
-    }
-
-    .trade-table {
-        width: 100%;
-        max-width: var(--card-width);
-        margin: 0 auto;
-    }
-
-    .dialog-box {
-        width: 90%;
-        max-width: var(--card-width);
-        margin: 0 auto;
-        padding: var(--safe-area-top) var(--safe-area-right) var(--safe-area-bottom) var(--safe-area-left);
-    }
-
-    @media (max-height: 500px) {
-        .game-container {
-            height: 100vh;
-            min-height: 100vh;
-        }
-
-        .board {
-            width: var(--board-size-mobile);
-            height: var(--board-size-mobile);
-            margin: 0 auto;
-        }
-    }
-}
-
-/* iPad and medium devices */
-@media screen and (min-width: var(--mobile-width)) and (max-width: var(--tablet-width)) {
-    div.board {
-        width: var(--board-size-tablet);
-        height: var(--board-size-tablet);
-        margin: 0 auto;
-    }
-
-    .action-bar {
-        height: var(--action-bar-height);
-    }
-
-    .action-bar button {
-        width: var(--button-size);
-        height: var(--button-size);
-    }
-}
-
-/* Landscape mode for mobile devices */
-@media screen and (max-width: 926px) and (orientation: landscape) {
-    .game-container {
-        height: 100vh;
-        min-height: 100vh;
-    }
-
-    div.board {
-        width: var(--board-size-mobile);
-        height: var(--board-size-mobile);
-        margin: 0 auto;
-    }
-
-    .action-bar {
-        height: var(--action-bar-height);
-        width: 100%;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        padding: 0 var(--safe-area-right) 0 var(--safe-area-left);
-        background-color: rgba(255, 255, 255, 0.9);
-    }
-
-    .card-display-actions {
-        width: 100%;
-        max-width: var(--card-width);
-        margin: 0 auto;
-        padding: var(--safe-area-top) var(--safe-area-right) var(--safe-area-bottom) var(--safe-area-left);
-    }
-}
-
-/* iPad Pro and large devices */
-@media only screen and (min-width: var(--tablet-width)) and (max-width: var(--ipad-pro-width)) {
-    .board {
-        width: var(--board-size-ipad-pro);
-        height: var(--board-size-ipad-pro);
-        margin: 0 auto;
-    }
-
-    .action-bar {
-        height: var(--action-bar-height);
-    }
-
-    .card-display-actions {
-        width: 100%;
-        max-width: var(--card-width);
-        margin: 0 auto;
-    }
-
-    main nav.content {
-        padding: var(--safe-area-top) var(--safe-area-right) var(--safe-area-bottom) var(--safe-area-left);
-    }
-
-    .dialog-box {
-        width: 90%;
-        max-width: var(--card-width);
-        margin: 0 auto;
-    }
-}
-
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-    button, 
-    input[type="button"],
-    input[type="submit"],
-    input[type="reset"],
-    select,
-    a {
-        min-height: var(--min-touch-target);
-        min-width: var(--min-touch-target);
-        padding: 0.5em 1em;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    input[type="email"],
-    input[type="password"],
-    input[type="search"],
-    input[type="tel"],
-    input[type="url"],
-    textarea {
-        font-size: 16px;
-        min-height: var(--min-touch-target);
-        padding: 0.5em;
-    }
-
-    .game-container {
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: none;
-    }
-
-    * {
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-    }
-
-    .game-container {
-        height: 100vh;
-        min-height: 100vh;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-}
-
-/* iOS device specific optimizations */
-html.ios-device {
-    height: 100%;
-    min-height: 100%;
-}
-
-html.ios-device body {
-    height: 100%;
-    min-height: 100%;
-    -webkit-overflow-scrolling: touch;
-}
-
-html.ios-device .game-container {
-    height: 100%;
-    min-height: 100%;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: none;
-}
-
-html.ios-device .board {
-    width: var(--board-size-mobile);
-    height: var(--board-size-mobile);
-}
-
-html.ios-device input, 
-html.ios-device select, 
-html.ios-device textarea {
-    font-size: 16px;
-}
-
-html.ios-device button {
-    min-height: var(--min-touch-target);
-    min-width: var(--min-touch-target);
 }
