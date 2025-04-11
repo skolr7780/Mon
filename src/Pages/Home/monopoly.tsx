@@ -131,17 +131,11 @@ function App({ socket, name, server }: { socket: Socket; name: string; server: S
             afterFinished?: () => void,
             adding: boolean = true
         ) {
-            var sum_moves = (final_position - _xplayer.position) % 40;
-            if ((final_position < _xplayer.position || sum_moves < 0) && adding) {
-                sum_moves = 40 - _xplayer.position + final_position;
-            }
-
-            if (!adding) {
-                sum_moves = _xplayer.position - final_position;
-                if (sum_moves < 0) {
-                    sum_moves += 40;
-                }
-            }
+            // Get the dice roll value (the difference between final and current position)
+            const diceRoll = Math.abs(final_position - _xplayer.position);
+            
+            // Always move exactly the number of spaces shown by the dice
+            const sum_moves = diceRoll;
 
             const time = 0.35 * 1000 * sum_moves;
 
@@ -481,24 +475,36 @@ function App({ socket, name, server }: { socket: Socket; name: string; server: S
         const socket_Message = (message: { from: string; message: string }) => {
             navRef.current?.addMessage(message);
         };
-        const socket_DiceRollResult = (args: { listOfNums: [number, number, number]; turnId: string }) => {
+        const socket_DiceRollResult = (args: { listOfNums: [number, number, number]; turnId: string; canPlayAgain: boolean }) => {
+            // Get the dice roll value (first number in listOfNums)
+            const diceRoll = args.listOfNums[0];
+            const targetPosition = args.listOfNums[2];
+            
             SetHistories((old) => [
                 ...old,
                 history(
-                    `${clients.get(args.turnId)?.username ?? "unknown player"} rolled [${args.listOfNums[0]}, ${args.listOfNums[1]}] moving to "${
-                        propretyMap.get(args.listOfNums[2])?.name ?? ""
+                    `${clients.get(args.turnId)?.username ?? "unknown player"} rolled [${diceRoll}] moving to "${
+                        propretyMap.get(targetPosition)?.name ?? ""
                     }"`
                 ),
             ]);
+            
+            // Play rolling sound
             var audio = new Audio("./rolling.mp3");
             audio.volume = ((settings?.audio[1] ?? 100) / 100) * ((settings?.audio[0] ?? 100) / 100);
             audio.loop = false;
             audio.play();
-            // const sumTimes = args.listOfNums[0] + args.listOfNums[1];
+
             const localPlayer = clients.get(socket.id) as Player;
             const xplayer = clients.get(args.turnId) as Player;
-            const dice_generatorResults = playerMoveGENERATOR(args.listOfNums[2], xplayer, true, () => {
-                if (args.turnId != socket.id && args.listOfNums[2] === 30) {
+            
+            // Calculate the new position based on the dice roll
+            const currentPosition = xplayer.position;
+            const newPosition = (currentPosition + diceRoll) % 40;
+            
+            // Generate movement with exactly the number of spaces from the dice roll
+            const dice_generatorResults = playerMoveGENERATOR(newPosition, xplayer, true, () => {
+                if (args.turnId != socket.id && newPosition === 30) {
                     setTimeout(() => {
                         SetHistories((old) => [...old, history(`${clients.get(args.turnId)?.username ?? "unknown player"} goes to jail`)]);
                         const generatorResults = playerMoveGENERATOR(10, xplayer, false, () => {
@@ -516,7 +522,7 @@ function App({ socket, name, server }: { socket: Socket; name: string; server: S
             });
 
             engineRef.current?.diceResults({
-                l: [args.listOfNums[0], args.listOfNums[1]],
+                l: [args.listOfNums[0], 0],
                 time: localPlayer.isInJail ? 2000 : dice_generatorResults.time + 2000 + 800,
                 onDone: () => {
                     if (socket.id !== args.turnId) return;
@@ -525,11 +531,11 @@ function App({ socket, name, server }: { socket: Socket; name: string; server: S
                     const proprety = propretyMap.get(location);
                     if (proprety != undefined) {
                         if (proprety.id === "communitychest" || proprety.id === "chance") {
-                            socket.emit("chorch_roll", { is_chance: proprety.id === "chance", rolls: args.listOfNums[0] + args.listOfNums[1] });
+                            socket.emit("chorch_roll", { is_chance: proprety.id === "chance", rolls: args.listOfNums[0] });
                         } else {
                             engineRef.current?.setStreet({
                                 location,
-                                rolls: args.listOfNums[1] + args.listOfNums[0],
+                                rolls: args.listOfNums[0],
                                 onResponse: (b, info) => {
                                     var time_till_free = 0;
                                     if (b === "buy") {
@@ -764,7 +770,7 @@ function App({ socket, name, server }: { socket: Socket; name: string; server: S
 
             if (xplayer.isInJail) {
                 setTimeout(() => {
-                    if (args.listOfNums[0] == args.listOfNums[1]) {
+                    if (args.listOfNums[0] == 6) {
                         xplayer.isInJail = false;
                         setTimeout(() => {
                             dice_generatorResults.func();

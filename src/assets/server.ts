@@ -159,17 +159,56 @@ export async function main(playersCount: number, f?: (host: string, Server: Serv
                     });
                     socket.on("roll_dice", () => {
                         try {
-                            const first = Math.floor(Math.random() * 6) + 1;
-                            const second = Math.floor(Math.random() * 6) + 1;
-                            const x = `{${getCurrentTime()}} [${socket.id}] Player "${player.username}" rolled a [${first},${second}].`;
+                            if (socket.id !== currentId) {
+                                server.logFunction(`{${getCurrentTime()}} [${socket.id}] Player "${player.username}" tried to roll dice but it's not their turn.`);
+                                return;
+                            }
+                            
+                            const roll = Math.floor(Math.random() * 6) + 1;
+                            const x = `{${getCurrentTime()}} [${socket.id}] Player "${player.username}" rolled a [${roll}].`;
                             logs_strings.push(x);
                             server.logFunction(x);
-                            const sum = first + second;
-                            var pos = (player.position + sum) % 40;
+                            
+                            if (player.balance < -500) {
+                                EmitAll("game_over", {
+                                    loser: player.id,
+                                    reason: "bankruptcy"
+                                });
+                                return;
+                            }
+                            
+                            const newPosition = (player.position + roll) % 40;
+                            player.position = newPosition;
+                            
                             EmitAll("dice_roll_result", {
-                                listOfNums: [first, second, pos],
+                                listOfNums: [roll, 0, newPosition],
                                 turnId: currentId,
+                                canPlayAgain: roll === 6
                             });
+                            
+                            if (roll === 6) {
+                                EmitAll("can_play_again", {
+                                    playerId: player.id
+                                });
+                            } else {
+                                setTimeout(() => {
+                                    if (currentId === socket.id) {
+                                        const arr = Array.from(Clients.values())
+                                            .filter((v) => v.player.balance > 0)
+                                            .map((v) => v.player.id);
+                                        var i = arr.indexOf(socket.id);
+                                        i = (i + 1) % arr.length;
+                                        currentId = arr[i];
+                                        
+                                        EmitAll("turn-finished", {
+                                            from: socket.id,
+                                            turnId: currentId,
+                                            pJson: player.to_json(),
+                                            WinningMode: selectedMode.WinningMode,
+                                        });
+                                    }
+                                }, 5000);
+                            }
                         } catch (e) {
                             server.logFunction(e);
                         }
@@ -322,6 +361,48 @@ export async function main(playersCount: number, f?: (host: string, Server: Serv
                     socket.on("trade-update", (x: GameTrading) => {
                         if (!selectedMode.AllowDeals) return;
                         EmitAll("trade-update", x);
+                    });
+
+                    // Add new event for property purchase decision
+                    socket.on("property_decision", (decision: { buy: boolean }) => {
+                        try {
+                            // Check if it's this player's turn
+                            if (socket.id !== currentId) {
+                                server.logFunction(`{${getCurrentTime()}} [${socket.id}] Player "${player.username}" tried to make a property decision but it's not their turn.`);
+                                return;
+                            }
+                            
+                            const currentProperty = monopolyJSON.properties[player.position];
+                            if (!currentProperty) {
+                                server.logFunction(`{${getCurrentTime()}} [${socket.id}] Player "${player.username}" tried to make a property decision but there's no property at position ${player.position}.`);
+                                return;
+                            }
+                            
+                            if (decision.buy && player.balance >= (currentProperty.price || 0)) {
+                                player.balance -= (currentProperty.price || 0);
+                                player.properties.push(currentProperty);
+                                
+                                EmitAll("property_purchased", {
+                                    playerId: player.id,
+                                    property: currentProperty
+                                });
+                            }
+                            
+                            // End turn after property decision
+                            const arr = Array.from(Clients.values())
+                                .filter((v) => v.player.balance > 0)
+                                .map((v) => v.player.id);
+                            var i = arr.indexOf(socket.id);
+                            i = (i + 1) % arr.length;
+                            currentId = arr[i];
+                            
+                            EmitAll("turn_ended", {
+                                playerId: player.id,
+                                nextPlayerId: currentId
+                            });
+                        } catch (e) {
+                            server.logFunction(e);
+                        }
                     });
                 } catch (e) {
                     server.logFunction(e);

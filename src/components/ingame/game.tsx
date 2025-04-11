@@ -52,7 +52,6 @@ export interface MonopolyGameRef {
 export interface g_SpecialAction {}
 export type g_Buy = 0 | 1 | 2 | 3 | 4 | "h";
 
-// Create the component with forwardRef
 const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) => {
     const propretyMap = new Map(
         monopolyJSON.properties.map((obj) => {
@@ -62,7 +61,6 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
 
     const [showDice, SetShowDice] = useState<boolean>(false);
     const [sended, SetSended] = useState<boolean>(false);
-    const [showStreet, ShowStreet] = useState<boolean>(false);
     const [advnacedStreet, SetAdvancedStreet] = useState<boolean>(false);
     const [rotation, SetRotation] = useState<number>(0);
     const [scale, SetScale] = useState<number>(1);
@@ -91,22 +89,17 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
 
     const [streetType, SetStreetType] = useState<"Street" | "Utilities" | "Railroad" | "Chance" | "CommunityChest">("Street");
 
-    function diceAnimation(a: number, b: number) {
+    function diceAnimation(a: number) {
         const element = document.getElementById("dice-panel") as HTMLDivElement;
-
         var bb = true;
         var t = -1;
 
         function randomCube() {
             var l = "./c";
             const numA = Math.floor(Math.random() * 6) + 1;
-            const numB = Math.floor(Math.random() * 6) + 1;
-            element.innerHTML = `
-                <img src="${l}${numA}.png" />
-                <img src="${l}${numB}.png" />
-                
-                `;
+            element.innerHTML = `<img src="${l}${numA}.png" />`;
         }
+
         function anim() {
             if (bb) {
                 randomCube();
@@ -114,12 +107,10 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
                 requestAnimationFrame(anim);
             } else {
                 var l = "./c";
-                element.innerHTML = `
-                <img src="${l}${a}.png" />
-                <img src="${l}${b}.png" />
-                `;
+                element.innerHTML = `<img src="${l}${a}.png" />`;
             }
         }
+
         setTimeout(() => {
             bb = false;
         }, 1000);
@@ -148,7 +139,7 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
 
     useImperativeHandle(ref, () => ({
         diceResults: (args) => {
-            diceAnimation(...args.l);
+            diceAnimation(args.l[0]);
             SetShowDice(true);
             setTimeout(() => {
                 SetShowDice(false);
@@ -161,243 +152,280 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
             SetSended(false);
         },
         setStreet: (args) => {
+            // Reset any previous state
+            SetSended(false);
+
+            // Don't show card if player hasn't moved yet (still at starting position)
+            if (args.location === 0 && !args.rolls) {
+                args.onResponse("nothing", {});
+                return;
+            }
+
             // find data based on location
             const localPlayer = prop.players.filter((v) => v.id === prop.socket.id)[0];
             const x = propretyMap.get(args.location);
 
-            if (x && args.location !== -1 && args.location < 40 && args.location >= 0) {
-                function searchForButtons(
-                    advanced: boolean,
-                    location: number,
-                    fartherInfo?: {
-                        rolls: number;
-                    }
-                ) {
-                    function clickSound() {
-                        const _settings = (JSON.parse(decodeURIComponent(CookieManager.get("monopolySettings") as string)) as MonopolyCookie).settings;
-                        let audio = new Audio("./click.mp3");
-                        audio.volume = ((_settings?.audio[1] ?? 100) / 100) * ((_settings?.audio[0] ?? 100) / 100);
-                        audio.loop = false;
-                        audio.play();
-                    }
-                    function func() {
-                        if (advanced) {
-                            const b = document.querySelector("div#advanced-responses");
+            // Validate position
+            if (!x || args.location === -1 || args.location >= 40 || args.location < 0) {
+                args.onResponse("nothing", {});
+                return;
+            }
 
-                            if (b) {
-                                const _property = propretyMap.get(location);
-                                if (!_property) return;
-                                const divB = b as HTMLDivElement;
-                                while (divB.firstChild) {
-                                    divB.removeChild(divB.firstChild);
-                                }
-                                const propId = Array.from(new Map(localPlayer.properties.map((v, i) => [i, v])).entries()).filter(
-                                    (v) => v[1].posistion === args.location
-                                )[0][0];
+            // Hide card display initially
+            const cardElement = document.querySelector('.card-display-actions') as HTMLDivElement;
+            if (cardElement) {
+                cardElement.classList.remove('show');
+            }
 
-                                function transformCount(v: 0 | 2 | 1 | 3 | 4 | "h") {
-                                    switch (v) {
-                                        case "h":
-                                            return 5;
+            // Ensure player position matches server position
+            if (localPlayer.position !== args.location) {
+                prop.socket.emit("sync_position", args.location);
+                setTimeout(() => {
+                    prop.socket.emit("request_card", args.location);
+                }, 500);
+                return;
+            }
 
-                                        default:
-                                            return v;
-                                    }
-                                }
-                                const count: number = transformCount(localPlayer.properties[propId].count);
-                                for (let index = count + 1; index < 6; index++) {
-                                    const myButton = document.createElement("button");
-                                    if (index === 5) {
-                                        myButton.innerHTML = `buy hotel`;
-                                        // dont let someone buy hotel of not have a set of 4 houses
-                                        myButton.disabled =
-                                            index !== count + 1 ||
-                                            (_property.ohousecost ?? 0) > (prop.players.filter((v) => v.id === prop.socket.id)[0].balance ?? 0);
-                                        myButton.onclick = () => {
-                                            args.onResponse("advance-buy", {
-                                                state: index,
-                                                money: 1,
-                                            });
-                                            ShowStreet(false);
-                                        };
-                                    } else {
-                                        myButton.innerHTML = `buy ${index} house${index > 1 ? "s" : ""}`;
-                                        myButton.onclick = () => {
-                                            args.onResponse("advance-buy", {
-                                                state: index,
-                                                money: index - count,
-                                            });
-                                            ShowStreet(false);
-                                        };
-                                        myButton.disabled =
-                                            (index - count) * (_property.housecost ?? 0) >
-                                            (prop.players.filter((v) => v.id === prop.socket.id)[0].balance ?? 0);
-                                    }
-                                    divB.appendChild(myButton);
-                                }
-                                // last button of cancel
-                                const continueButtons = document.createElement("button");
-                                continueButtons.innerHTML = "CONTINUE";
-                                continueButtons.onclick = () => {
-                                    clickSound();
-                                    args.onResponse("nothing", {});
-                                    ShowStreet(false);
-                                };
-                                divB.appendChild(continueButtons);
-                            } else {
-                                requestAnimationFrame(func);
+            // Additional check to prevent showing card at game start
+            if (args.location === 0 && args.rolls === 0) {
+                args.onResponse("nothing", {});
+                return;
+            }
+
+            function searchForButtons(
+                advanced: boolean,
+                location: number,
+                fartherInfo?: {
+                    rolls: number;
+                }
+            ) {
+                function clickSound() {
+                    const _settings = (JSON.parse(decodeURIComponent(CookieManager.get("monopolySettings") as string)) as MonopolyCookie).settings;
+                    let audio = new Audio("./click.mp3");
+                    audio.volume = ((_settings?.audio[1] ?? 100) / 100) * ((_settings?.audio[0] ?? 100) / 100);
+                    audio.loop = false;
+                    audio.play();
+                }
+                function func() {
+                    if (advanced) {
+                        const b = document.querySelector("div#advanced-responses");
+
+                        if (b) {
+                            const _property = propretyMap.get(location);
+                            if (!_property) return;
+                            const divB = b as HTMLDivElement;
+                            while (divB.firstChild) {
+                                divB.removeChild(divB.firstChild);
                             }
-                        } else {
-                            const b = document.querySelector("button#card-response-yes");
+                            const propId = Array.from(new Map(localPlayer.properties.map((v, i) => [i, v])).entries()).filter(
+                                (v) => v[1].posistion === args.location
+                            )[0][0];
 
-                            if (b) {
-                                (b as HTMLButtonElement).onclick = () => {
-                                    if (fartherInfo !== undefined)
-                                        args.onResponse("special_action", {
-                                            rolls: fartherInfo.rolls,
+                            function transformCount(v: 0 | 2 | 1 | 3 | 4 | "h") {
+                                switch (v) {
+                                    case "h":
+                                        return 5;
+
+                                    default:
+                                        return v;
+                                }
+                            }
+                            const count: number = transformCount(localPlayer.properties[propId].count);
+                            for (let index = count + 1; index < 6; index++) {
+                                const myButton = document.createElement("button");
+                                if (index === 5) {
+                                    myButton.innerHTML = `buy hotel`;
+                                    // dont let someone buy hotel of not have a set of 4 houses
+                                    myButton.disabled =
+                                        index !== count + 1 ||
+                                        (_property.ohousecost ?? 0) > (prop.players.filter((v) => v.id === prop.socket.id)[0].balance ?? 0);
+                                    myButton.onclick = () => {
+                                        args.onResponse("advance-buy", {
+                                            state: index,
+                                            money: 1,
                                         });
-                                    else args.onResponse("buy", {});
-                                    ShowStreet(false);
-                                };
-                                (document.querySelector("button#card-response-no") as HTMLButtonElement).onclick = () => {
-                                    clickSound();
-                                    args.onResponse("nothing", {});
-                                    ShowStreet(false);
-                                };
-                            } else {
-                                requestAnimationFrame(func);
+                                        if (cardElement) {
+                                            cardElement.classList.remove('show');
+                                        }
+                                    };
+                                } else {
+                                    myButton.innerHTML = `buy ${index} house${index > 1 ? "s" : ""}`;
+                                    myButton.onclick = () => {
+                                        args.onResponse("advance-buy", {
+                                            state: index,
+                                            money: index - count,
+                                        });
+                                        if (cardElement) {
+                                            cardElement.classList.remove('show');
+                                        }
+                                    };
+                                    myButton.disabled =
+                                        (index - count) * (_property.housecost ?? 0) >
+                                        (prop.players.filter((v) => v.id === prop.socket.id)[0].balance ?? 0);
+                                }
+                                divB.appendChild(myButton);
                             }
-                        }
-                    }
-                    return func;
-                }
-
-                var belong_to_me = false;
-                var belong_to_others = false;
-                var count: 0 | 1 | 2 | 3 | 4 | "h" = 0;
-                // check states
-                for (const _prp of localPlayer.properties) {
-                    if (!belong_to_me && _prp.posistion === args.location) {
-                        belong_to_me = true;
-                        count = _prp.count;
-                    }
-                }
-                for (const _p of prop.players) {
-                    for (const _prp of _p.properties) {
-                        if (_prp.posistion === args.location && _p.id != localPlayer.id) belong_to_others = true;
-                    }
-                }
-
-                if (x.group === "Special") {
-                    args.onResponse("nothing", {});
-                    ShowStreet(false);
-                } else if (x.group === "Utilities") {
-                    if (!belong_to_me) {
-                        if (belong_to_others) {
-                            args.onResponse("someones", {});
-                            ShowStreet(false);
-                            return;
-                        } else {
-                            if (localPlayer.balance - (x?.price ?? 0) < 0) {
-                                ShowStreet(false);
+                            // last button of cancel
+                            const continueButtons = document.createElement("button");
+                            continueButtons.innerHTML = "CONTINUE";
+                            continueButtons.onclick = () => {
+                                clickSound();
                                 args.onResponse("nothing", {});
-                                return;
-                            } else {
-                                SetStreetType("Utilities");
-                                const streetInfo = {
-                                    cardCost: x.price ?? -1,
-                                    title: x.name ?? "error",
-                                    type: x.id.includes("water") ? "water" : "electricity",
-                                } as UtilitiesDisplayInfo;
-                                SetStreetDisplay(streetInfo);
-                                SetAdvancedStreet(false);
-
-                                swipeSound();
-                                ShowStreet(true);
-                                requestAnimationFrame(
-                                    searchForButtons(false, args.location, {
-                                        rolls: args.rolls,
-                                    })
-                                );
-                            }
+                                if (cardElement) {
+                                    cardElement.classList.remove('show');
+                                }
+                            };
+                            divB.appendChild(continueButtons);
+                        } else {
+                            requestAnimationFrame(func);
                         }
                     } else {
-                        args.onResponse("nothing", {});
+                        const b = document.querySelector("button#card-response-yes");
+
+                        if (b) {
+                            (b as HTMLButtonElement).onclick = () => {
+                                if (fartherInfo !== undefined)
+                                    args.onResponse("special_action", {
+                                        rolls: fartherInfo.rolls,
+                                    });
+                                else args.onResponse("buy", {});
+                                if (cardElement) {
+                                    cardElement.classList.remove('show');
+                                }
+                            };
+                            (document.querySelector("button#card-response-no") as HTMLButtonElement).onclick = () => {
+                                clickSound();
+                                args.onResponse("nothing", {});
+                                if (cardElement) {
+                                    cardElement.classList.remove('show');
+                                }
+                                // Set sended to true to prevent automatic roll
+                                SetSended(true);
+                            };
+                        } else {
+                            requestAnimationFrame(func);
+                        }
                     }
-                } else if (x.group === "Railroad") {
-                    if (!belong_to_me) {
-                        if (belong_to_others) {
-                            args.onResponse("someones", {});
-                            ShowStreet(false);
+                }
+                return func;
+            }
+
+            var belong_to_me = false;
+            var belong_to_others = false;
+            var count: 0 | 1 | 2 | 3 | 4 | "h" = 0;
+            // check states
+            for (const _prp of localPlayer.properties) {
+                if (!belong_to_me && _prp.posistion === args.location) {
+                    belong_to_me = true;
+                    count = _prp.count;
+                }
+            }
+            for (const _p of prop.players) {
+                for (const _prp of _p.properties) {
+                    if (_prp.posistion === args.location && _p.id != localPlayer.id) belong_to_others = true;
+                }
+            }
+
+            if (x.group === "Special") {
+                args.onResponse("nothing", {});
+            } else if (x.group === "Utilities") {
+                if (!belong_to_me) {
+                    if (belong_to_others) {
+                        args.onResponse("someones", {});
+                        return;
+                    } else {
+                        if (localPlayer.balance - (x?.price ?? 0) < 0) {
                             return;
                         } else {
-                            if (localPlayer.balance - (x?.price ?? 0) < 0) {
-                                ShowStreet(false);
-                                args.onResponse("nothing", {});
-                                return;
-                            } else {
-                                SetStreetType("Railroad");
-                                const streetInfo = {
-                                    cardCost: x.price ?? -1,
-                                    title: x.name ?? "error",
-                                } as UtilitiesDisplayInfo;
-                                SetStreetDisplay(streetInfo);
-                                swipeSound();
-                                ShowStreet(true);
-                                requestAnimationFrame(searchForButtons(false, args.location));
+                            SetStreetType("Utilities");
+                            const streetInfo = {
+                                cardCost: x.price ?? -1,
+                                title: x.name ?? "error",
+                                type: x.id.includes("water") ? "water" : "electricity",
+                            } as UtilitiesDisplayInfo;
+                            SetStreetDisplay(streetInfo);
+                            SetAdvancedStreet(false);
+
+                            swipeSound();
+                            if (cardElement) {
+                                cardElement.classList.add('show');
                             }
+                            requestAnimationFrame(
+                                searchForButtons(false, args.location, {
+                                    rolls: args.rolls,
+                                })
+                            );
                         }
-                    } else {
-                        args.onResponse("nothing", {});
                     }
                 } else {
-                    if (!belong_to_me && localPlayer.balance - (x?.price ?? 0) < 0) {
-                        ShowStreet(false);
-                        args.onResponse("nothing", {});
+                    args.onResponse("nothing", {});
+                }
+            } else if (x.group === "Railroad") {
+                if (!belong_to_me) {
+                    if (belong_to_others) {
+                        args.onResponse("someones", {});
                         return;
-                    }
-
-                    if (belong_to_me) {
                     } else {
-                        if (belong_to_others) {
-                            args.onResponse("someones", {});
-                            ShowStreet(false);
+                        if (localPlayer.balance - (x?.price ?? 0) < 0) {
                             return;
+                        } else {
+                            SetStreetType("Railroad");
+                            const streetInfo = {
+                                cardCost: x.price ?? -1,
+                                title: x.name ?? "error",
+                            } as UtilitiesDisplayInfo;
+                            SetStreetDisplay(streetInfo);
+                            swipeSound();
+                            if (cardElement) {
+                                cardElement.classList.add('show');
+                            }
+                            requestAnimationFrame(searchForButtons(false, args.location));
                         }
                     }
-                    if (belong_to_me && count === "h") {
-                        ShowStreet(false);
-                        args.onResponse("nothing", {});
-                        return;
-                    }
-                    SetStreetType("Street");
-                    const streetInfo = {
-                        cardCost: x.price ?? -1,
-                        hotelsCost: x.ohousecost ?? -1,
-                        housesCost: x.housecost ?? -1,
-                        rent: x.rent ?? -1,
-                        multpliedrent: x.multpliedrent
-                            ? [
-                                  x.multpliedrent[0] ?? -1,
-                                  x.multpliedrent[1] ?? -1,
-                                  x.multpliedrent[2] ?? -1,
-                                  x.multpliedrent[3] ?? -1,
-                                  x.multpliedrent[4] ?? -1,
-                              ]
-                            : [-1, -1, -1, -1, -1],
-                        rentWithColorSet: x.rent ? x.rent * 2 : -1,
-                        title: x.name ?? "error",
-                        group: x.group,
-                    } as StreetDisplayInfo;
-                    SetStreetDisplay(streetInfo);
-                    belong_to_me ? SetAdvancedStreet(true) : SetAdvancedStreet(false);
-                    swipeSound();
-                    ShowStreet(true);
-                    requestAnimationFrame(searchForButtons(belong_to_me, args.location));
+                } else {
+                    args.onResponse("nothing", {});
                 }
             } else {
-                args.onResponse("nothing", {});
-                ShowStreet(false);
+                if (!belong_to_me && localPlayer.balance - (x?.price ?? 0) < 0) {
+                    return;
+                }
+
+                if (belong_to_me) {
+                } else {
+                    if (belong_to_others) {
+                        args.onResponse("someones", {});
+                        return;
+                    }
+                }
+                if (belong_to_me && count === "h") {
+                    return;
+                }
+                SetStreetType("Street");
+                const streetInfo = {
+                    cardCost: x.price ?? -1,
+                    hotelsCost: x.ohousecost ?? -1,
+                    housesCost: x.housecost ?? -1,
+                    rent: x.rent ?? -1,
+                    multpliedrent: x.multpliedrent
+                        ? [
+                              x.multpliedrent[0] ?? -1,
+                              x.multpliedrent[1] ?? -1,
+                              x.multpliedrent[2] ?? -1,
+                              x.multpliedrent[3] ?? -1,
+                              x.multpliedrent[4] ?? -1,
+                          ]
+                        : [-1, -1, -1, -1, -1],
+                    rentWithColorSet: x.rent ? x.rent * 2 : -1,
+                    title: x.name ?? "error",
+                    group: x.group,
+                } as StreetDisplayInfo;
+                SetStreetDisplay(streetInfo);
+                belong_to_me ? SetAdvancedStreet(true) : SetAdvancedStreet(false);
+                swipeSound();
+                if (cardElement) {
+                    cardElement.classList.add('show');
+                }
+                requestAnimationFrame(searchForButtons(belong_to_me, args.location));
             }
         },
         chorch(element, is_chance, time) {
@@ -405,10 +433,26 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
             SetStreetDisplay({
                 title: element.title,
             } as ChanceDisplayInfo);
+
+            // Get card element
+            const cardElement = document.querySelector('.chance-display-actions') as HTMLDivElement;
+            if (cardElement) {
+                cardElement.classList.add('show');
+            }
+
             swipeSound();
-            ShowStreet(true);
+            if (cardElement) {
+                cardElement.classList.add('show');
+            }
+            
             setTimeout(() => {
-                ShowStreet(false);
+                if (cardElement) {
+                    cardElement.classList.remove('show');
+                    cardElement.style.transform = "translateY(-50%) translateX(-70vw)";
+                    cardElement.style.opacity = "0";
+                    cardElement.style.visibility = "hidden";
+                    cardElement.style.pointerEvents = "none";
+                }
             }, time);
         },
         applyAnimation(type) {
@@ -684,13 +728,22 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
 
     useEffect(() => {
         const rollElement = document.querySelector(`button[data-button-type="roll"]`) as HTMLButtonElement;
-        rollElement.onclick = () => {
-            SetSended(true);
-            prop.socket.emit("roll_dice");
-            console.warn("first roll");
-            SetTimer(0);
-        };
-    }, []);
+        if (rollElement) {
+            // Only enable roll button if it's player's turn and they haven't rolled yet
+            if (prop.myTurn && !sended) {
+                rollElement.setAttribute("aria-disabled", "false");
+                rollElement.onclick = () => {
+                    SetSended(true);
+                    prop.socket.emit("roll_dice");
+                    console.warn("Rolling single die");
+                    SetTimer(0);
+                };
+            } else {
+                rollElement.setAttribute("aria-disabled", "true");
+                rollElement.onclick = () => {};
+            }
+        }
+    }, [prop.myTurn, sended]);
 
     useEffect(() => {
         if (prop.myTurn && !sended) {
@@ -1413,6 +1466,423 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
                                 }}
                             ></div>
                         </div>
+                        <div id="display-streets">
+                            <div
+                                data-position="39"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "83%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="38"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "74.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="37"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "66.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="36"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "58.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="35"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "50%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="34"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "41.75%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="33"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "33.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="32"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "25.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="31"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "17.25%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="30"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="29"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "83%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="28"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "74.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="27"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "66.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="26"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "58.25%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="25"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "50%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="24"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "41.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="23"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "33.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="22"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "25.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="21"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "17.25%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="20"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "6.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="19"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "17.25%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="18"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "25.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="17"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "33.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="16"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "41.75%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="15"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "50%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="14"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "58.25%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="13"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "66.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="12"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "74.75%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="11"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 75,
+                                    top: "83%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                className="street"
+                                data-position="10"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "6.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="9"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "17.25%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="8"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "25.5%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="7"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "33.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="6"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "41.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="5"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "50%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="4"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "58.25%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="3"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "66.5%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="2"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "74.75%",
+                                }}
+                            ></div>
+                            <div
+                                data-position="1"
+                                className="street"
+                                style={{
+                                    width: 75,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "83%",
+                                }}
+                            ></div>
+
+                            <div
+                                data-position="0"
+                                className="street"
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    top: "93.5%",
+                                    left: "93.5%",
+                                }}
+                            ></div>
+                        </div>
                     </div>
                     <div className="action-bar" style={prop.myTurn && !sended ? {} : { translate: "-50% 20vh" }}>
                         {prop.selectedMode.turnTimer !== undefined && prop.selectedMode.turnTimer > 0 ? (
@@ -1425,7 +1895,7 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
                         ) : (
                             <></>
                         )}
-                        <button data-button-type="roll" aria-disabled={false}>
+                        <button data-button-type="roll" aria-disabled={!(prop.myTurn && !sended)}>
                             <p>ROLL THE </p>
                             <img style={{ marginLeft: 10 }} src={RollIcon.replace("public/", "")} />
                         </button>
@@ -1453,13 +1923,7 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
                     </div>
                     <div
                         className={streetType === "Chance" || streetType === "CommunityChest" ? "chance-display-actions" : "card-display-actions"}
-                        style={
-                            !showStreet
-                                ? {
-                                      transform: "translateY(-50%) translateX(-70vw)",
-                                  }
-                                : {}
-                        }
+                        style={{}}
                     >
                         {streetType === "Chance" || streetType === "CommunityChest" ? (
                             <>

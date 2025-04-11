@@ -309,8 +309,7 @@ export async function main(host: string, initials: botInitial) {
         };
     }
 
-    const socket_DiceRollResult = (args: { listOfNums: [number, number, number]; turnId: string }) => {
-        // const sumTimes = args.listOfNums[0] + args.listOfNums[1];
+    const socket_DiceRollResult = (args: { listOfNums: [number, number, number]; turnId: string; canPlayAgain: boolean }) => {
         const localPlayer = clients.get(socket.id) as Player;
         const xplayer = clients.get(args.turnId) as Player;
         const dice_generatorResults = playerMoveGENERATOR(args.listOfNums[2], xplayer, true, () => {
@@ -327,7 +326,7 @@ export async function main(host: string, initials: botInitial) {
         });
 
         engineRef.diceResults({
-            l: [args.listOfNums[0], args.listOfNums[1]],
+            l: [args.listOfNums[0], 0],
             time: localPlayer.isInJail ? 2000 : dice_generatorResults.time + 2000 + 800,
             onDone: () => {
                 if (socket.id !== args.turnId) return;
@@ -336,11 +335,11 @@ export async function main(host: string, initials: botInitial) {
                 const proprety = propretyMap.get(location);
                 if (proprety != undefined) {
                     if (proprety.id === "communitychest" || proprety.id === "chance") {
-                        socket.emit("chorch_roll", { is_chance: proprety.id === "chance", rolls: args.listOfNums[0] + args.listOfNums[1] });
+                        socket.emit("chorch_roll", { is_chance: proprety.id === "chance", rolls: args.listOfNums[0] });
                     } else {
                         const actionList = engineRef.setStreet({
                             location,
-                            rolls: args.listOfNums[1] + args.listOfNums[0],
+                            rolls: args.listOfNums[0],
                             onResponse: (b, info) => {
                                 var time_till_free = 0;
                                 if (b === "buy") {
@@ -385,8 +384,44 @@ export async function main(host: string, initials: botInitial) {
                                                 var payment_ammount = 0;
 
                                                 if (proprety.group === "Utilities" && prp.rent) {
-                                                    const multy_ = p.properties.filter((v) => v.group === "Utilities").length === 2 ? 10 : 4;
-                                                    payment_ammount = prp.rent * multy_;
+                                                    const l = [Math.floor(Math.random() * 6) + 1];
+                                                    socket.emit(
+                                                        "history",
+                                                        history(
+                                                            `${clients.get(socket.id)?.username ?? "unknown player"} rolled [${l[0]}]`
+                                                        )
+                                                    );
+
+                                                    engineRef.diceResults({
+                                                        l: [l[0], 0],
+                                                        time: 2000,
+                                                        onDone: () => {
+                                                            payment_ammount = l[0] * (proprety.rent ?? 1);
+
+                                                            xplayer.balance -= payment_ammount;
+                                                            socket.emit("pay", {
+                                                                balance: payment_ammount,
+                                                                from: socket.id,
+                                                                to: p.id,
+                                                            });
+
+                                                            socket.emit(
+                                                                "history",
+                                                                history(
+                                                                    `${
+                                                                        clients.get(socket.id)?.username ?? "unknown player"
+                                                                    } pay ${payment_ammount} to ${
+                                                                        clients.get(p.id)?.username ?? "unknown player"
+                                                                    }`
+                                                                )
+                                                            );
+
+                                                            clients.set(socket.id, xplayer);
+                                                            // engineRef.freeDice();
+                                                            const json = (clients.get(socket.id) as Player).toJson();
+                                                            socket.emit("finish-turn", json);
+                                                        },
+                                                    });
                                                 } else if (proprety.group === "Railroad") {
                                                     const count = p.properties
                                                         .filter((v) => v.group === "Railroad")
@@ -394,32 +429,28 @@ export async function main(host: string, initials: botInitial) {
                                                             (v) => v.morgage === undefined || (v.morgage !== undefined && v.morgage === false)
                                                         ).length;
                                                     const rents = [0, 25, 50, 100, 200];
-                                                    payment_ammount = rents[count];
-                                                } else if (prp.count === 0) {
-                                                    payment_ammount = proprety?.rent ?? 0;
-                                                } else if (typeof prp.count === "number" && prp.count > 0) {
-                                                    payment_ammount = (proprety?.multpliedrent ?? [0, 0, 0, 0])[prp.count - 1] ?? 0;
-                                                } else if (prp.count === "h") {
-                                                    payment_ammount = (proprety?.multpliedrent ?? [0, 0, 0, 0, 0])[4] ?? 0;
+                                                    payment_ammount = rents[count] * (proprety.rent ?? 1);
+
+                                                    if (prp.morgage === undefined || (prp.morgage !== undefined && prp.morgage === false))
+                                                        xplayer.balance -= payment_ammount;
+                                                    socket.emit("pay", {
+                                                        balance: payment_ammount,
+                                                        from: socket.id,
+                                                        to: p.id,
+                                                    });
+                                                    socket.emit(
+                                                        "history",
+                                                        history(
+                                                            `${
+                                                                clients.get(socket.id)?.username ?? "unknown player"
+                                                            } pay ${payment_ammount} to ${clients.get(p.id)?.username ?? "unknown player"}`
+                                                        )
+                                                    );
+                                                    clients.set(socket.id, xplayer);
+                                                    // engineRef.freeDice();
+                                                    const json = (clients.get(socket.id) as Player).toJson();
+                                                    socket.emit("finish-turn", json);
                                                 }
-
-                                                if (prp.morgage === undefined || (prp.morgage !== undefined && prp.morgage === false))
-                                                    localPlayer.balance -= payment_ammount;
-
-                                                socket.emit("pay", {
-                                                    balance: payment_ammount,
-                                                    from: socket.id,
-                                                    to: p.id,
-                                                });
-
-                                                socket.emit(
-                                                    "history",
-                                                    history(`
-                                                ${clients.get(socket.id)?.username ?? "unknown user"} pay ${payment_ammount} to ${
-                                                        clients.get(p.id)?.username ?? "unknown user"
-                                                    }
-                                                `)
-                                                );
                                             }
                                         }
                                     }
@@ -770,21 +801,19 @@ export async function main(host: string, initials: botInitial) {
                                                         var payment_ammount = 0;
 
                                                         if (proprety.group === "Utilities" && prp.rent) {
-                                                            const l = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
+                                                            const l = [Math.floor(Math.random() * 6) + 1];
                                                             socket.emit(
                                                                 "history",
                                                                 history(
-                                                                    `${clients.get(socket.id)?.username ?? "unknown player"} rolled [${l[0]}, ${
-                                                                        l[1]
-                                                                    }]`
+                                                                    `${clients.get(socket.id)?.username ?? "unknown player"} rolled [${l[0]}]`
                                                                 )
                                                             );
 
                                                             engineRef.diceResults({
-                                                                l: [l[0], l[1]],
+                                                                l: [l[0], 0],
                                                                 time: 2000,
                                                                 onDone: () => {
-                                                                    payment_ammount = (l[0] + l[1]) * (c.rentmultiplier ?? 1);
+                                                                    payment_ammount = l[0] * (c.rentmultiplier ?? 1);
 
                                                                     xplayer.balance -= payment_ammount;
                                                                     socket.emit("pay", {
