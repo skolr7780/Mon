@@ -10,7 +10,16 @@ export default defineConfig({
         emptyOutDir: true,
         rollupOptions: {
             output: {
-                manualChunks: undefined
+                manualChunks: undefined,
+                assetFileNames: (assetInfo) => {
+                    if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)) {
+                        return 'assets/images/[name]-[hash][extname]';
+                    }
+                    if (/\.css$/i.test(assetInfo.name)) {
+                        return 'assets/css/[name]-[hash][extname]';
+                    }
+                    return 'assets/[name]-[hash][extname]';
+                }
             }
         }
     },
@@ -22,6 +31,9 @@ export default defineConfig({
     },
     css: {
         devSourcemap: true,
+        modules: {
+            localsConvention: 'camelCase'
+        }
     },
     optimizeDeps: {
         include: ['react', 'react-dom']

@@ -83,9 +83,9 @@
 /* CSS Variables for responsive design */
 :root {
     /* Device sizes */
-    --mobile-width: 768px;
-    --tablet-width: 1024px;
-    --desktop-width: 1366px;
+    --mobile-width: 428px;
+    --tablet-width: 768px;
+    --desktop-width: 1024px;
 
     /* Board sizes */
     --board-size-mobile: min(95vw, 95vh);
@@ -1924,15 +1924,18 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
 @media screen and (max-width: var(--mobile-width)) {
     main {
         flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
     }
 
     main nav.main {
         position: fixed;
         top: 0;
         left: 0;
-        height: 100%;
+        height: 100vh;
         transform: translateX(-100%);
         z-index: 1000;
+        max-width: 100%;
     }
 
     main nav.main[data-visible="true"] {
@@ -1942,14 +1945,25 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
     div.board {
         width: var(--board-size-mobile);
         height: var(--board-size-mobile);
-        transform: translateX(-50%) translateY(-50%) scale(0.95);
+        transform: translateX(-50%) translateY(-50%);
         margin: 10px auto;
+        touch-action: manipulation;
     }
 
     .action-bar {
+        position: fixed;
         bottom: max(var(--safe-area-bottom), 10px);
+        left: 0;
+        width: 100%;
         padding: 10px;
         gap: 8px;
+        background: rgba(20, 20, 20, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        border-radius: 10px;
     }
 
     .action-bar button {
@@ -1957,6 +1971,7 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
         min-width: 44px;
         padding: 8px;
         font-size: 14px;
+        touch-action: manipulation;
     }
 
     .card-display-actions {
@@ -1969,6 +1984,7 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
         border-radius: 16px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         -webkit-overflow-scrolling: touch;
+        touch-action: manipulation;
     }
 
     .trade-table {
@@ -1983,6 +1999,19 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
         max-height: 80vh;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        padding: 20px;
+    }
+
+    /* Fix for mobile keyboard */
+    @media (max-height: 500px) {
+        .game-container {
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .board {
+            transform: translateX(-50%) translateY(-50%) scale(0.8);
+        }
     }
 }
 
@@ -2005,19 +2034,38 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
     }
 }
 
-/* Landscape mode */
+/* Landscape mode optimizations */
 @media screen and (max-width: 926px) and (orientation: landscape) {
     .game-container {
         padding: 5px;
         flex-direction: row;
+        height: 100vh;
     }
+    
     div.board {
         max-width: 70%;
         max-height: 100%;
         margin-right: 10px;
+        transform: translateX(-50%) translateY(-50%);
     }
+    
     .action-bar {
-        max-height: calc(100% - var(--safe-area-top) - var(--safe-area-bottom));
+        position: fixed;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: auto;
+        height: auto;
+        flex-direction: column;
+        padding: 15px;
+        max-height: 80vh;
+    }
+    
+    .card-display-actions {
+        width: 60%;
+        max-height: 90vh;
+        top: 50%;
+        transform: translateX(-50%) translateY(-50%);
     }
 }
 
@@ -2032,7 +2080,10 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
     .clickable {
         min-height: var(--min-touch-target);
         min-width: var(--min-touch-target);
+        padding: 12px;
+        -webkit-tap-highlight-color: transparent;
     }
+    
     input[type="text"],
     input[type="number"],
     input[type="email"],
@@ -2040,9 +2091,18 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
     select,
     textarea {
         font-size: 16px;
+        min-height: var(--min-touch-target);
+        padding: 8px;
     }
+    
     .game-container {
         padding-bottom: max(var(--safe-area-bottom), 10px);
+        touch-action: manipulation;
+    }
+    
+    /* Prevent double-tap zoom */
+    * {
+        touch-action: manipulation;
     }
 }
 

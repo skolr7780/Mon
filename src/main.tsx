@@ -5,15 +5,15 @@ import Gallery from "./Pages/Galery/gallery.tsx";
 import Home from "./Pages/Home/home.tsx";
 import Users from "./Pages/Users/users.tsx";
 
-// iOS optimization
-const initIOSOptimizations = () => {
-    // Fix iOS height issue (100vh)
+// Mobile optimization
+const initMobileOptimizations = () => {
+    // Fix viewport height issue
     const setVhProperty = () => {
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
 
-    // Fix iOS double-tap zoom
+    // Prevent double-tap zoom
     const addTouchStartListener = () => {
         document.addEventListener('touchstart', (e) => {
             if (e.touches.length > 1) {
@@ -22,22 +22,31 @@ const initIOSOptimizations = () => {
         }, { passive: false });
     };
 
-    // Fix iOS keyboard behavior
-    const handleIOSKeyboard = () => {
+    // Handle mobile keyboard
+    const handleMobileKeyboard = () => {
         const inputs = document.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                }, 100);
+            });
+            
             input.addEventListener('blur', () => {
-                window.scrollTo(0, 0);
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                }, 100);
             });
         });
     };
 
-    // Detect iOS devices
+    // Detect mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     
-    if (isIOS) {
-        // Add vh variable for iOS
+    if (isMobile) {
+        // Add vh variable
         setVhProperty();
         window.addEventListener('resize', setVhProperty);
         window.addEventListener('orientationchange', () => {
@@ -48,16 +57,20 @@ const initIOSOptimizations = () => {
         addTouchStartListener();
         
         // Add keyboard handling
-        handleIOSKeyboard();
+        handleMobileKeyboard();
         
-        // Add iOS class for specific styling
-        document.documentElement.classList.add('ios-device');
+        // Add device class for specific styling
+        document.documentElement.classList.add('mobile-device');
+        
+        if (isIOS) {
+            document.documentElement.classList.add('ios-device');
+        }
     }
 };
 
 // Initialize optimizations
 if (typeof window !== 'undefined') {
-    window.addEventListener('DOMContentLoaded', initIOSOptimizations);
+    window.addEventListener('DOMContentLoaded', initMobileOptimizations);
 }
 
 const router = createBrowserRouter([
