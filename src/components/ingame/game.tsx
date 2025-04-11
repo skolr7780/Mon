@@ -87,13 +87,26 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
     const handleTouchStart = (e: React.TouchEvent) => {
         if (e.touches.length === 1) {
             const touch = e.touches[0];
+            setTouchStartX(touch.clientX);
+            setTouchStartY(touch.clientY);
+            setIsTouchMoving(false);
+            
+            if (touchTimeout.current) {
+                clearTimeout(touchTimeout.current);
+            }
+            
+            const now = Date.now();
+            if (now - lastTapTime.current < 300) {
+                handleDoubleTap(e);
+            }
+            lastTapTime.current = now;
+            
             lastTouch.current = {
                 x: touch.clientX,
                 y: touch.clientY,
-                time: Date.now()
+                time: now
             };
         } else if (e.touches.length === 2) {
-            // Handle pinch zoom
             const touch1 = e.touches[0];
             const touch2 = e.touches[1];
             const distance = Math.hypot(
@@ -107,11 +120,11 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
     const handleTouchMove = (e: React.TouchEvent) => {
         if (e.touches.length === 1) {
             const touch = e.touches[0];
-            const deltaX = touch.clientX - lastTouch.current.x;
-            const deltaY = touch.clientY - lastTouch.current.y;
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
             
-            // Prevent scrolling when interacting with the board
             if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+                setIsTouchMoving(true);
                 e.preventDefault();
             }
             
@@ -121,7 +134,6 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
                 time: Date.now()
             };
         } else if (e.touches.length === 2) {
-            // Handle pinch zoom
             const touch1 = e.touches[0];
             const touch2 = e.touches[1];
             const distance = Math.hypot(
@@ -143,8 +155,8 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
             const touch = e.changedTouches[0];
             const deltaTime = Date.now() - lastTouch.current.time;
             
-            // Handle tap
-            if (deltaTime < 300) {
+            // Handle tap only if we weren't moving
+            if (!isTouchMoving && deltaTime < 300) {
                 const deltaX = Math.abs(touch.clientX - lastTouch.current.x);
                 const deltaY = Math.abs(touch.clientY - lastTouch.current.y);
                 
@@ -153,6 +165,7 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
                 }
             }
             
+            setIsTouchMoving(false);
             lastTouch.current = {
                 x: 0,
                 y: 0,
@@ -185,8 +198,14 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
         const handleOrientation = () => {
             if (window.matchMedia("(orientation: landscape)").matches) {
                 SetRotation(0);
+                if (boardRef.current) {
+                    boardRef.current.style.transform = `rotate(${rotation}deg)`;
+                }
             } else {
                 SetRotation(0);
+                if (boardRef.current) {
+                    boardRef.current.style.transform = `rotate(${rotation}deg)`;
+                }
             }
         };
 
@@ -196,7 +215,7 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
         return () => {
             window.removeEventListener('orientationchange', handleOrientation);
         };
-    }, []);
+    }, [rotation]);
 
     // Add passive touch listeners for better performance
     useEffect(() => {
