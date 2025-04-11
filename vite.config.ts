@@ -17,14 +17,6 @@ export default defineConfig({
     base: "/Mon/",
     server: {
         https: true,
-        host: true,
-        port: 3000,
-    },
-    css: {
-        devSourcemap: true,
-    },
-    optimizeDeps: {
-        include: ['react', 'react-dom']
     }
 });
 
