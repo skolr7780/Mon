@@ -74,6 +74,8 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
     const touchTimeout = useRef<NodeJS.Timeout>();
     const lastTapTime = useRef(0);
     const boardRef = useRef<HTMLDivElement>(null);
+    const lastTouch = useRef({ x: 0, y: 0, time: 0 });
+    const lastPinchDistance = useRef<number | null>(null);
 
     const handleClick = (element: any) => {
         if (!element) return;
@@ -83,78 +85,99 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
     };
 
     const handleTouchStart = (e: React.TouchEvent) => {
-        if (!prop.myTurn) return;
-        
-        const touch = e.touches[0];
-        setTouchStartX(touch.clientX);
-        setTouchStartY(touch.clientY);
-        setIsTouchMoving(false);
-
-        // Handle double tap
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTapTime.current;
-        
-        if (tapLength < 300 && tapLength > 0) {
-            e.preventDefault();
-            handleDoubleTap(e);
-        }
-        lastTapTime.current = currentTime;
-
-        if (touchTimeout.current) {
-            clearTimeout(touchTimeout.current);
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            lastTouch.current = {
+                x: touch.clientX,
+                y: touch.clientY,
+                time: Date.now()
+            };
+        } else if (e.touches.length === 2) {
+            // Handle pinch zoom
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const distance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+            lastPinchDistance.current = distance;
         }
     };
 
     const handleTouchMove = (e: React.TouchEvent) => {
-        if (!prop.myTurn) return;
-        
-        const touch = e.touches[0];
-        const deltaX = Math.abs(touch.clientX - touchStartX);
-        const deltaY = Math.abs(touch.clientY - touchStartY);
-        
-        if (deltaX > 5 || deltaY > 5) {
-            setIsTouchMoving(true);
-        }
-
-        // Handle pinch zoom if multiple touches
-        if (e.touches.length === 2) {
-            handlePinchZoom(e);
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - lastTouch.current.x;
+            const deltaY = touch.clientY - lastTouch.current.y;
+            
+            // Prevent scrolling when interacting with the board
+            if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+                e.preventDefault();
+            }
+            
+            lastTouch.current = {
+                x: touch.clientX,
+                y: touch.clientY,
+                time: Date.now()
+            };
+        } else if (e.touches.length === 2) {
+            // Handle pinch zoom
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const distance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+            
+            if (lastPinchDistance.current) {
+                const scale = distance / lastPinchDistance.current;
+                handlePinchZoom(e, scale);
+            }
+            
+            lastPinchDistance.current = distance;
         }
     };
 
     const handleTouchEnd = (e: React.TouchEvent, element: any) => {
-        if (!prop.myTurn || isTouchMoving) return;
+        if (e.touches.length === 0) {
+            const touch = e.changedTouches[0];
+            const deltaTime = Date.now() - lastTouch.current.time;
+            
+            // Handle tap
+            if (deltaTime < 300) {
+                const deltaX = Math.abs(touch.clientX - lastTouch.current.x);
+                const deltaY = Math.abs(touch.clientY - lastTouch.current.y);
+                
+                if (deltaX < 10 && deltaY < 10) {
+                    handleClick(element);
+                }
+            }
+            
+            lastTouch.current = {
+                x: 0,
+                y: 0,
+                time: 0
+            };
+            lastPinchDistance.current = null;
+        }
+    };
 
-        const touch = e.changedTouches[0];
-        const deltaX = Math.abs(touch.clientX - touchStartX);
-        const deltaY = Math.abs(touch.clientY - touchStartY);
-
-        if (deltaX < 10 && deltaY < 10) {
-            handleClick(element);
+    const handlePinchZoom = (e: React.TouchEvent, scale: number) => {
+        e.preventDefault();
+        const board = document.querySelector('.board') as HTMLElement;
+        if (board) {
+            const currentScale = parseFloat(board.style.transform.replace('scale(', '')) || 1;
+            const newScale = Math.min(Math.max(currentScale * scale, 0.5), 2);
+            board.style.transform = `scale(${newScale})`;
         }
     };
 
     const handleDoubleTap = (e: React.TouchEvent) => {
-        // Reset zoom level on double tap
-        SetScale(1);
-        SetRotation(0);
-    };
-
-    const handlePinchZoom = (e: React.TouchEvent) => {
-        if (e.touches.length !== 2) return;
-
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        
-        // Calculate distance between touches
-        const distance = Math.hypot(
-            touch2.clientX - touch1.clientX,
-            touch2.clientY - touch1.clientY
-        );
-
-        // Update scale based on pinch distance
-        const newScale = Math.min(Math.max(scale + (distance / 500), 0.5), 2);
-        SetScale(newScale);
+        e.preventDefault();
+        const board = document.querySelector('.board') as HTMLElement;
+        if (board) {
+            board.style.transform = 'scale(1)';
+        }
     };
 
     // Board rotation for landscape mode
@@ -177,25 +200,31 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
 
     // Add passive touch listeners for better performance
     useEffect(() => {
-        const board = boardRef.current;
-        if (!board) return;
-
-        const options = { passive: true };
-        
-        const touchStartHandler = (e: TouchEvent) => handleTouchStart(e as any);
-        const touchMoveHandler = (e: TouchEvent) => handleTouchMove(e as any);
-        const touchEndHandler = (e: TouchEvent) => handleTouchEnd(e as any, null);
-
-        board.addEventListener('touchstart', touchStartHandler, options);
-        board.addEventListener('touchmove', touchMoveHandler, options);
-        board.addEventListener('touchend', touchEndHandler, options);
-
-        return () => {
-            board.removeEventListener('touchstart', touchStartHandler);
-            board.removeEventListener('touchmove', touchMoveHandler);
-            board.removeEventListener('touchend', touchEndHandler);
-        };
-    }, [prop.myTurn]);
+        const board = document.querySelector('.board') as HTMLElement;
+        if (board) {
+            // Add touch event listeners
+            board.addEventListener('touchstart', handleTouchStart as any, { passive: false });
+            board.addEventListener('touchmove', handleTouchMove as any, { passive: false });
+            board.addEventListener('touchend', handleTouchEnd as any, { passive: false });
+            
+            // Add double tap listener
+            let lastTap = 0;
+            board.addEventListener('touchend', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 300 && tapLength > 0) {
+                    handleDoubleTap(e as any);
+                }
+                lastTap = currentTime;
+            }, { passive: false });
+            
+            return () => {
+                board.removeEventListener('touchstart', handleTouchStart as any);
+                board.removeEventListener('touchmove', handleTouchMove as any);
+                board.removeEventListener('touchend', handleTouchEnd as any);
+            };
+        }
+    }, []);
 
     useEffect(() => {
         const settings_interval = setInterval(() => {
