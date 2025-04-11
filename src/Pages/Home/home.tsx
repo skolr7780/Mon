@@ -456,7 +456,7 @@ export default function Home() {
                                         document.location.href = "/";
                                     }}
                                 >
-                                    @itaylayzer - 10.12.23
+                                    iAz
                                 </p>{" "}
                                 Game
                             </header>
