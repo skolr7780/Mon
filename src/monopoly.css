@@ -91,7 +91,8 @@ body {
     font-family: "Josefin Sans";
     user-select: none;
     overflow-x: hidden;
-
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 #root {
@@ -1842,5 +1843,47 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
     100% {
         scale: 1 1;
         height: 23px;
+    }
+}
+
+@media (max-width: 768px) {
+    .board {
+        transform-origin: center center;
+        touch-action: none;
+        will-change: transform;
+    }
+
+    .street {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+    }
+
+    .action-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(0,0,0,0.8);
+        padding: 10px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .action-bar button {
+        min-width: 44px;
+        min-height: 44px;
+        margin: 5px;
+    }
+
+    .card-display-actions {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        width: 90%;
+        max-width: 400px;
     }
 }

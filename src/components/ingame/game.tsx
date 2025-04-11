@@ -70,6 +70,13 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
     const [timer, SetTimer] = useState<number>(0);
     const boardRef = useRef<HTMLDivElement>(null);
 
+    const handleClick = (element: any) => {
+        if (!element) return;
+        if (element.posistion !== undefined) {
+            prop.clickedOnBoard(element.posistion);
+        }
+    };
+
     // Board rotation for landscape mode
     useEffect(() => {
         const handleOrientation = () => {
@@ -518,7 +525,7 @@ const MonopolyGame = forwardRef<MonopolyGameRef, MonopolyGameProps>((prop, ref) 
             ) as HTMLDivElement;
 
             element.onclick = () => {
-                prop.clickedOnBoard(x.posistion);
+                handleClick(x);
             };
 
             element.onmousemove = () => {
