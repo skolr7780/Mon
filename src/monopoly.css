@@ -133,24 +133,54 @@
     body {
         -webkit-overflow-scrolling: touch;
         overscroll-behavior-y: none;
+        /* Fix for iOS 100vh issue */
+        height: -webkit-fill-available;
     }
 
     .board {
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: none;
+        /* Improve touch interactions */
+        touch-action: pan-x pan-y;
     }
 
     .action-bar {
         padding-bottom: max(env(safe-area-inset-bottom), 10px);
+        /* Ensure action bar stays visible */
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
     }
 
     input, select, textarea {
         font-size: 16px;
+        /* Prevent zoom on focus */
+        transform: scale(1);
     }
 
     button {
         -webkit-appearance: none;
         -webkit-tap-highlight-color: transparent;
+        /* Minimum size for touch targets */
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Fix for iOS momentum scrolling */
+    .game-container {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Fix notch area display */
+    .dialog-box, .notification {
+        padding-top: max(env(safe-area-inset-top), 10px);
+        padding-left: max(env(safe-area-inset-left), 10px);
+        padding-right: max(env(safe-area-inset-right), 10px);
+    }
+    
+    /* Prevent double-tap zoom */
+    * {
+        touch-action: manipulation;
     }
 }
 
@@ -1978,43 +2008,41 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
 /* Landscape mode */
 @media screen and (max-width: 926px) and (orientation: landscape) {
     .game-container {
+        padding: 5px;
         flex-direction: row;
-        justify-content: space-between;
     }
-
     div.board {
-        width: 80vh;
-        height: 80vh;
-        margin: 0;
+        max-width: 70%;
+        max-height: 100%;
+        margin-right: 10px;
     }
-
     .action-bar {
-        right: max(var(--safe-area-right), 10px);
-        top: 50%;
-        transform: translateY(-50%);
-        width: auto;
-        flex-direction: column;
-        padding: 15px;
+        max-height: calc(100% - var(--safe-area-top) - var(--safe-area-bottom));
     }
 }
 
 /* Touch optimizations */
 @media (hover: none) and (pointer: coarse) {
     button, 
-    .action-button,
-    .property-nav,
-    .trade-button {
+    a, 
+    select, 
+    input[type=checkbox], 
+    input[type=radio],
+    [role="button"],
+    .clickable {
         min-height: var(--min-touch-target);
         min-width: var(--min-touch-target);
-        padding: 12px;
-        -webkit-tap-highlight-color: transparent;
     }
-
     input[type="text"],
     input[type="number"],
-    select {
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea {
         font-size: 16px;
-        min-height: var(--min-touch-target);
+    }
+    .game-container {
+        padding-bottom: max(var(--safe-area-bottom), 10px);
     }
 }
 
@@ -2025,5 +2053,156 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
         padding-right: max(var(--safe-area-right), 10px);
         padding-bottom: max(var(--safe-area-bottom), 10px);
         padding-top: max(var(--safe-area-top), 10px);
+    }
+}
+
+/* iPhone-specific adjustments */
+@media screen and (max-width: 428px) and (-webkit-device-pixel-ratio: 2), 
+       screen and (max-width: 428px) and (-webkit-device-pixel-ratio: 3) {
+    .board {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1/1;
+        max-width: 100%;
+    }
+    
+    .action-bar {
+        width: 100%;
+        height: auto;
+        padding-bottom: max(env(safe-area-inset-bottom), 15px);
+    }
+    
+    .card-display-actions {
+        width: 95%;
+        max-height: 80vh;
+    }
+    
+    .dialog-box {
+        width: 95%;
+        max-width: 350px;
+    }
+    
+    main nav.content {
+        padding: 10px;
+    }
+}
+
+/* iPad-specific adjustments */
+@media only screen and (min-width: 768px) and (max-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) {
+    .board {
+        width: var(--board-size-tablet);
+        height: var(--board-size-tablet);
+        max-width: 85vw;
+        max-height: 85vh;
+    }
+    
+    .action-bar {
+        width: var(--board-size-tablet);
+        padding: 10px;
+    }
+    
+    .card-display-actions {
+        width: 80%;
+        max-height: 70vh;
+    }
+    
+    main nav.content {
+        padding: 15px;
+    }
+    
+    .dialog-box {
+        width: 80%;
+        max-width: 500px;
+    }
+}
+
+/* iPhone landscape orientation fix */
+@media only screen and (min-device-width: 375px) and (max-device-width: 926px) and (orientation: landscape) {
+    .game-container {
+        flex-direction: row;
+    }
+    
+    .board {
+        max-height: 95vh;
+        max-width: 60vw;
+        margin-right: 10px;
+    }
+    
+    .action-bar {
+        width: 35vw;
+        height: 95vh;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+    
+    .card-display-actions {
+        width: 60%;
+        max-height: 90vh;
+    }
+}
+
+/* iOS device-specific class styles */
+html.ios-device {
+    /* Use the dynamic vh property set in JavaScript */
+    --real-vh: var(--vh, 1vh);
+}
+
+html.ios-device body {
+    /* Fix for iOS 100vh issue using the custom property */
+    min-height: calc(100 * var(--real-vh));
+    height: calc(100 * var(--real-vh));
+}
+
+html.ios-device .game-container {
+    height: calc(100 * var(--real-vh));
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+html.ios-device .board {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+html.ios-device input, 
+html.ios-device textarea, 
+html.ios-device select {
+    font-size: 16px; /* Prevents zoom on focus */
+}
+
+html.ios-device button {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Specific iPad Pro optimizations */
+@media only screen and (min-device-width: 1024px) and (max-device-width: 1366px) and (-webkit-min-device-pixel-ratio: 2) {
+    html.ios-device .board {
+        width: 80vh;
+        height: 80vh;
+        max-width: 80%;
+        max-height: 80%;
+    }
+    
+    html.ios-device .action-bar {
+        width: 80vh;
+    }
+    
+    html.ios-device .card-display-actions {
+        width: 70%;
+        max-height: 70vh;
+    }
+}
+
+/* Fix for iPhone X and newer with notch */
+@supports (padding-top: env(safe-area-inset-top)) {
+    html.ios-device .action-bar {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    html.ios-device .dialog-box {
+        padding-top: env(safe-area-inset-top);
     }
 }
