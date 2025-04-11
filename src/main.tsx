@@ -48,6 +48,20 @@ const initMobileOptimizations = () => {
         }, 100);
     };
 
+    // Handle mobile menu
+    const handleMobileMenu = () => {
+        const menuButton = document.querySelector('.menu-button');
+        const menu = document.querySelector('main nav.main');
+        
+        if (menuButton && menu) {
+            menuButton.addEventListener('click', () => {
+                menu.setAttribute('data-visible', 
+                    menu.getAttribute('data-visible') === 'true' ? 'false' : 'true'
+                );
+            });
+        }
+    };
+
     // Detect mobile devices
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -64,6 +78,9 @@ const initMobileOptimizations = () => {
         
         // Add keyboard handling
         handleMobileKeyboard();
+        
+        // Add mobile menu handling
+        handleMobileMenu();
         
         // Add device class for specific styling
         document.documentElement.classList.add('mobile-device');

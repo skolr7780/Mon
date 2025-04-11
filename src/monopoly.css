@@ -99,6 +99,7 @@
     --button-size: clamp(44px, 8vw, 60px);
     --card-width: clamp(250px, 90vw, 400px);
     --property-card-height: clamp(350px, 70vh, 450px);
+    --menu-width: clamp(300px, 90vw, 400px);
     
     /* Safe areas */
     --safe-area-bottom: env(safe-area-inset-bottom, 0px);
@@ -528,13 +529,63 @@ input {
 
 /* Navigation menu */
 main nav.main {
-    width: 100%;
-    max-width: 400px;
+    width: var(--menu-width);
     justify-content: flex-start;
     display: flex;
     z-index: 3;
     background-color: #cde6d0;
     transition: transform 0.3s ease;
+}
+
+/* Mobile menu styles */
+@media screen and (max-width: var(--mobile-width)) {
+    main nav.main {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform var(--transition-speed) var(--transition-timing);
+    }
+
+    main nav.main[data-visible="true"] {
+        transform: translateX(0);
+    }
+
+    main nav.main nav.header {
+        width: 100%;
+        height: var(--action-bar-height);
+        flex-direction: row;
+        padding: 10px;
+        background-color: rgb(20, 20, 20);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 101;
+    }
+
+    main nav.main nav.header div.upper {
+        display: flex;
+        flex-direction: row;
+        padding-top: 0;
+        gap: 10px;
+    }
+
+    main nav.main nav.header div.button {
+        margin-bottom: 0;
+        margin-inline: 5px;
+    }
+
+    main nav.content {
+        margin-top: var(--action-bar-height);
+        padding-top: var(--safe-area-top);
+        padding-bottom: var(--safe-area-bottom);
+        height: calc(100% - var(--action-bar-height));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
 main nav.main nav.header {
@@ -1926,30 +1977,16 @@ div.game div.trade-table div.trade-craft-buttons button:hover {
 
 /* iPhone and small devices */
 @media screen and (max-width: var(--mobile-width)) {
-    main {
+    .game-container {
+        height: 100vh;
+        min-height: 100vh;
         padding: var(--safe-area-top) var(--safe-area-right) var(--safe-area-bottom) var(--safe-area-left);
-    }
-
-    main nav.main {
-        width: 100%;
-        height: 100%;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 100;
-        transform: translateX(-100%);
-        transition: transform var(--transition-speed) var(--transition-timing);
-    }
-
-    main nav.main[data-visible="true"] {
-        transform: translateX(0);
     }
 
     div.board {
         width: var(--board-size-mobile);
         height: var(--board-size-mobile);
         margin: 0 auto;
-        position: relative;
     }
 
     .action-bar {
